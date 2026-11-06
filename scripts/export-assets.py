@@ -22,7 +22,7 @@ def main():
     mf=json.loads((SOURCE/'manifest.json').read_text())
     assert mf['checkpoint_sha256']=='61a5b331557f8e031de4f05fd71b48f58892e8d020578eaaeb1ea45f104af9c5'
     out=ROOT/'public/assets/r1';out.mkdir(parents=True,exist_ok=True)
-    for pattern in ['config-*.json','mujoco/r1-contact-*.xml']:
+    for pattern in ['config-*.json','mujoco/r1-contact-*.xml','stand-*.json','raise-*.json','reach-*.json']:
         for old in out.glob(pattern): old.unlink()
     shutil.copy2(SOURCE/'policy.onnx',out/'policy.onnx')
     shutil.copytree(SOURCE/'mujoco',out/'mujoco',dirs_exist_ok=True)
@@ -43,28 +43,36 @@ def main():
     config['motions']=[]
     count=501;t=np.arange(count)*.02
     # Smooth endpoints: no loop discontinuity, at most moderate arm excursions.
-    phase=np.clip((t-1.)/2.,0,1);ramp=phase*phase*(3-2*phase)
-    down=np.clip((10-t)/2.,0,1);ramp*=down*down*(3-2*down)
+    phase=np.clip((t-1.)/2.,0,1);up=phase*phase*(3-2*phase)
+    down=np.clip((10-t)/2.,0,1);fall=down*down*(3-2*down)
+    ramp=up*fall
+    # Exact derivative of the cubic ramps. A backward finite difference at
+    # t=10 is nonzero, falsely making the otherwise C1 loop fail validation.
+    ramp_velocity=3*phase*(1-phase)*fall-3*down*(1-down)*up
     motions={}
     for name,label,description in [
         ('stand','自然站立','固定的 R1 默认参考，观察策略如何维持平衡。'),
         ('raise','双臂抬起','自主生成的平滑抬臂参考，不是录制动画。'),
         ('reach','双臂前伸','自主生成的前伸参考，适合比较腕部弹簧扰动。')]:
-        q=np.tile(config['default'],(count,1)).astype(float)
+        offsets=np.zeros(26)
         names=config['physical_joint_names']
         if name in {'raise','reach'}:
             for side in ['left','right']:
-                q[:,names.index(side+'_shoulder_pitch_joint')]-=(.75 if name=='raise' else .9)*ramp
-                q[:,names.index(side+'_elbow_joint')]+=(.2 if name=='raise' else -.25)*ramp
-                q[:,names.index(side+'_shoulder_roll_joint')]+= (1 if side=='left' else -1)*(.12 if name=='raise' else .03)*ramp
+                offsets[names.index(side+'_shoulder_pitch_joint')]=-(.75 if name=='raise' else .9)
+                offsets[names.index(side+'_elbow_joint')]=(.2 if name=='raise' else -.25)
+                offsets[names.index(side+'_shoulder_roll_joint')]=(1 if side=='left' else -1)*(.12 if name=='raise' else .03)
+        q=np.asarray(config['default'])[None,:]+ramp[:,None]*offsets
+        velocity=ramp_velocity[:,None]*offsets
         pos=np.tile([0.,0.,config['default_root_height']],(count,1))
         quat=np.tile([1.,0.,0.,0.],(count,1))
-        motion=Motion(q,pos,quat,np.gradient(q,.02,axis=0),np.zeros_like(pos),np.zeros_like(pos))
+        motion=Motion(q,pos,quat,velocity,np.zeros_like(pos),np.zeros_like(pos))
         payload={'name':name,'fps':50,'joint_pos':motion.q.tolist(),'root_pos':pos.tolist(),'root_quat':quat.tolist(),
                  'joint_vel':motion.joint_vel.tolist(),'root_lin_vel':motion.root_lin_vel.tolist(),'root_ang_vel':motion.root_ang_vel.tolist(),
                  'source':'original analytic reference generated for this demo','license':'BSD-3-Clause'}
         (out/f'{name}.json').write_text(json.dumps(payload,separators=(',',':'))+'\n')
-        config['motions'].append({'id':name,'label':label,'description':description,'file':f'{name}.json','duration':10.})
+        motion_file=f'{name}-{sha256(out/f"{name}.json")[:12]}.json'
+        shutil.copy2(out/f'{name}.json',out/motion_file)
+        config['motions'].append({'id':name,'label':label,'description':description,'file':motion_file,'duration':10.})
         motions[name]=motion
     config['files']={str(p.relative_to(out)):sha256(p) for p in sorted(out.rglob('*')) if p.is_file() and p.name!='config.json'}
     (out/'config.json').write_text(json.dumps(config,indent=2,ensure_ascii=False)+'\n')

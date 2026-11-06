@@ -12,6 +12,7 @@ R1 柔顺运动跟踪策略的纯浏览器闭环演示。MuJoCo 3.12 WASM 推进
 
 - 可选择自然站立、双臂抬起、双臂前伸。参考周期为10秒，仿真持续运行，没有10秒停止限制；循环时不复位物理状态。
 - 直接拖动机器人施力，拖动空白区域旋转视角，滚轮缩放。不需要Shift或切换施力模式；松开撤力。
+- 运行中选择新动作会载入、复位并自动继续；加载失败时恢复真实生效的选项并显示错误。
 - 可开启腕部弹簧，或点击“轻推 10 N”；箭头和曲线显示施加的外力。
 - 5–15 N 滑块改变网络的柔顺力条件。它不是实际接触力的保证上限。
 - 可查看参考叠影、暂停、复位和调整播放速度；隐藏标签页自动暂停。可持续运行至手动暂停或触发保护。
@@ -81,3 +82,5 @@ docs/                  精简验证记录与实际截图
 ## 来源
 
 [GentleHumanoid](https://gentle-humanoid.axell.top/) 提供研究方法；[humanoid-policy-viewer](https://github.com/Axellwppr/humanoid-policy-viewer) 和 [mujoco_wasm](https://github.com/zalo/mujoco_wasm/) 提供网页交互与渲染参考。R1 控制层依据本项目的 Python 部署契约重新实现。使用官方 MuJoCo、ONNX Runtime Web、Three.js 与 Unitree 模型；详见第三方许可。
+
+2026-11-07动作切换修正与真实手臂运动证据见[修正记录](docs/MOTION_SWITCH_FIX.md)。旧测试只检查仿真存活，不能证明动作切换；现要求实际动作ID、策略输入和双臂关节运动均匹配，并覆盖加载失败与乱序返回。

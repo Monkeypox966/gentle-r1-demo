@@ -52,9 +52,12 @@
     "mujoco/r1-contact-63b02c43e430.xml": "63b02c43e430ad5055b523abb19726d5630d3a0c6107beb814d5e5d156540f15",
     "mujoco/r1.xml": "63b02c43e430ad5055b523abb19726d5630d3a0c6107beb814d5e5d156540f15",
     "policy.onnx": "726ca9fd62520498125186e19a5fbc1d9e8d6607245852ca91cb167592d6df21",
-    "raise.json": "5b8d9840f8834ab53aa7cf279d54f039d10b73bda37d373aa82ce2044113b6bd",
-    "reach.json": "561bf8f6dc13ee5d804cbee7249e7e9646670871ac7f38266f1e2c52022c19b9",
-    "stand.json": "12a5b12de6058d76fe77ae143c2c41c24aa65a8e38abfb69e69fd82a9742a55a"
+    "raise-147b979d0b9b.json": "147b979d0b9b56a4cdab367c19eb91725d8eb0b05e9bdaa480898dd1b354e560",
+    "raise.json": "147b979d0b9b56a4cdab367c19eb91725d8eb0b05e9bdaa480898dd1b354e560",
+    "reach-cc6f9cbb9c9d.json": "cc6f9cbb9c9db07355d1a8cbe91f6d66d53343a0bb5612220a23eb1ee93416a1",
+    "reach.json": "cc6f9cbb9c9db07355d1a8cbe91f6d66d53343a0bb5612220a23eb1ee93416a1",
+    "stand-5805574152ce.json": "5805574152ce03eeabe28829f2bd2dc4e1311fdaff4e757a15456a341c1dc051",
+    "stand.json": "5805574152ce03eeabe28829f2bd2dc4e1311fdaff4e757a15456a341c1dc051"
   },
   "browser_model_changes": {
     "source_model_sha256": "4e0d65ed3fa5a218c632b73c2c87d78e69b3ec8c0445ddadeaac0b931ee041ca",

@@ -14,7 +14,7 @@ export class Simulation {
   constructor(onProgress=()=>{}) {
     this.onProgress=onProgress;this.motionId='stand';this.forceLimit=10;this.spring=false;
     this.drag=null;this.pushUntil=0;this.lastForce=0;this.forceVectors=[];this.steps=0;
-    this.policyMs=0;this.requestedMotion=null;this.epoch=0;this.fault=null;
+    this.policyMs=0;this.motionRequest=0;this.epoch=0;this.fault=null;
   }
   async init() {
     this.onProgress(.05,'正在载入物理引擎');
@@ -71,7 +71,12 @@ export class Simulation {
     }
     return this.motions.get(id);
   }
-  async selectMotion(id) {this.epoch++;await this.loadMotion(id);this.motionId=id;this.reset();}
+  async selectMotion(id) {
+    const request=++this.motionRequest;this.epoch++;
+    await this.loadMotion(id);
+    if(request!==this.motionRequest)return false;
+    this.motionId=id;this.reset();return true;
+  }
   reset() {
     this.epoch++;const c=this.config,m=this.motions.get(this.motionId);if(!m)return;
     this.mj.mj_resetData(this.model,this.data);

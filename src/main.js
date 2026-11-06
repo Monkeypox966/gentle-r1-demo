@@ -3,18 +3,19 @@ import {Simulation} from './simulation.js';
 import {Viewer} from './viewer.js';
 
 const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const app={playing:false,busy:false,speed:1,sim:null,viewer:null,forceHistory:Array(150).fill(0),loaded:false};
+const app={playing:false,busy:false,speed:1,sim:null,viewer:null,forceHistory:Array(150).fill(0),loaded:false,motionRequest:0,resumeAfterMotion:false};
 let resolveReady,rejectReady;
 const ready=new Promise((resolve,reject)=>{resolveReady=resolve;rejectReady=reject;});
 function status(label,kind=''){ $('status-text').textContent=label;$('status-pill').className='status-pill '+kind; }
 function message(text,error=false){$('message').textContent=text;$('message').classList.toggle('error',error);}
 function pause(){app.playing=false;$('play-label').textContent='继续运行';$('play-icon').textContent='▶';if(app.loaded)status(app.sim.fault?'保护暂停':'已暂停',app.sim.fault?'error':'');}
 function play(){
-  if(!app.loaded)return;
+  if(!app.loaded||app.busy)return;
   if(app.sim.fault)reset();
   app.playing=true;$('play-label').textContent='暂停';$('play-icon').textContent='Ⅱ';status('策略运行中','running');message('拖拽机器人施力，或开启腕部弹簧，观察策略的响应。');
 }
 function reset(){
+  if(app.busy)return;
   pause();app.viewer.releaseDrag();app.sim.reset();app.forceHistory.fill(0);app.viewer.home();
   $('play-label').textContent='运行策略';status('已就绪');message('');update();
 }
@@ -52,10 +53,27 @@ async function main(){
   }catch(error){status('加载失败','error');$('loading-text').textContent=error.message;message('页面加载失败，可刷新重试。'+error.message,true);rejectReady(error);console.error(error);}
 }
 $('play').addEventListener('click',()=>app.playing?pause():play());$('reset').addEventListener('click',reset);
+function motionDescription(){
+  const entry=app.sim.config.motions.find(m=>m.id===app.sim.motionId);
+  $('motion-description').textContent=entry.label+' · '+(entry.id==='stand'?'固定站立参考；仿真持续运行。':'周期参考；循环边界不重置物理状态。');
+}
 $('motion').addEventListener('change',async event=>{
-  pause();app.viewer.releaseDrag();app.busy=true;status('正在切换');
-  try{await app.sim.selectMotion(event.target.value);app.forceHistory.fill(0);app.viewer.home();$('motion-description').textContent=event.target.value==='stand'?'固定站立参考；仿真持续运行。':'周期参考；循环边界不重置物理状态。';$('play-label').textContent='运行策略';status('已就绪');message('');}
-  catch(error){message(error.message,true);status('加载失败','error');}finally{app.busy=false;}
+  const id=event.currentTarget.value,request=++app.motionRequest;
+  app.resumeAfterMotion=app.playing||(app.busy&&app.resumeAfterMotion);
+  pause();app.viewer.releaseDrag();app.busy=true;$('play').disabled=$('reset').disabled=true;status('正在切换');
+  try{
+    const committed=await app.sim.selectMotion(id);
+    if(request!==app.motionRequest||!committed)return;
+    app.forceHistory.fill(0);app.viewer.home();motionDescription();$('motion').value=app.sim.motionId;
+    $('play-label').textContent='运行策略';status('已就绪');message('');
+    app.busy=false;if(app.resumeAfterMotion)play();update();
+  }catch(error){
+    if(request!==app.motionRequest)return;
+    $('motion').value=app.sim.motionId;motionDescription();
+    message('动作切换失败：'+error.message,true);status('切换失败','error');
+  }finally{
+    if(request===app.motionRequest){app.busy=false;app.resumeAfterMotion=false;$('play').disabled=$('reset').disabled=false;}
+  }
 });
 $('force-limit').addEventListener('input',event=>{const value=Number(event.target.value);$('force-value').innerHTML=value+'<span> N</span>';if(app.sim)app.sim.forceLimit=value;});
 $('spring').addEventListener('change',event=>{app.sim.setSpring(event.target.checked);message('');});

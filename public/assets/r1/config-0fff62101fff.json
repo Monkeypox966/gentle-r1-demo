@@ -351,21 +351,21 @@
       "id": "stand",
       "label": "自然站立",
       "description": "固定的 R1 默认参考，观察策略如何维持平衡。",
-      "file": "stand.json",
+      "file": "stand-5805574152ce.json",
       "duration": 10.0
     },
     {
       "id": "raise",
       "label": "双臂抬起",
       "description": "自主生成的平滑抬臂参考，不是录制动画。",
-      "file": "raise.json",
+      "file": "raise-147b979d0b9b.json",
       "duration": 10.0
     },
     {
       "id": "reach",
       "label": "双臂前伸",
       "description": "自主生成的前伸参考，适合比较腕部弹簧扰动。",
-      "file": "reach.json",
+      "file": "reach-cc6f9cbb9c9d.json",
       "duration": 10.0
     }
   ],
@@ -416,8 +416,11 @@
     "mujoco/r1-contact-63b02c43e430.xml": "63b02c43e430ad5055b523abb19726d5630d3a0c6107beb814d5e5d156540f15",
     "mujoco/r1.xml": "63b02c43e430ad5055b523abb19726d5630d3a0c6107beb814d5e5d156540f15",
     "policy.onnx": "726ca9fd62520498125186e19a5fbc1d9e8d6607245852ca91cb167592d6df21",
-    "raise.json": "5b8d9840f8834ab53aa7cf279d54f039d10b73bda37d373aa82ce2044113b6bd",
-    "reach.json": "561bf8f6dc13ee5d804cbee7249e7e9646670871ac7f38266f1e2c52022c19b9",
-    "stand.json": "12a5b12de6058d76fe77ae143c2c41c24aa65a8e38abfb69e69fd82a9742a55a"
+    "raise-147b979d0b9b.json": "147b979d0b9b56a4cdab367c19eb91725d8eb0b05e9bdaa480898dd1b354e560",
+    "raise.json": "147b979d0b9b56a4cdab367c19eb91725d8eb0b05e9bdaa480898dd1b354e560",
+    "reach-cc6f9cbb9c9d.json": "cc6f9cbb9c9db07355d1a8cbe91f6d66d53343a0bb5612220a23eb1ee93416a1",
+    "reach.json": "cc6f9cbb9c9db07355d1a8cbe91f6d66d53343a0bb5612220a23eb1ee93416a1",
+    "stand-5805574152ce.json": "5805574152ce03eeabe28829f2bd2dc4e1311fdaff4e757a15456a341c1dc051",
+    "stand.json": "5805574152ce03eeabe28829f2bd2dc4e1311fdaff4e757a15456a341c1dc051"
   }
 }

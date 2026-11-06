@@ -17,3 +17,21 @@ test('all frozen policy, model and reference assets match the provenance manifes
     assert.equal(createHash('sha256').update(fs.readFileSync(new URL(path,root))).digest('hex'),expected,path);
   }
 });
+
+test('each selectable reference has continuous loop endpoints and a distinct arm trajectory',()=>{
+  const root=new URL('../public/assets/r1/',import.meta.url);
+  const c=JSON.parse(fs.readFileSync(new URL('config.json',root)));
+  const middles=[];
+  for(const entry of c.motions){
+    const m=JSON.parse(fs.readFileSync(new URL(entry.file,root)));
+    assert.equal(m.name,entry.id);
+    for(const key of ['joint_pos','root_pos','root_quat','joint_vel','root_lin_vel','root_ang_vel']){
+      assert.equal(m[key].length,501);
+      assert.ok(m[key][0].every((x,i)=>Math.abs(x-m[key].at(-1)[i])<1e-8),`${entry.id}: ${key} seam must be continuous`);
+    }
+    middles.push(m.joint_pos[250]);
+  }
+  assert.ok(Math.max(...middles[1].map((x,i)=>Math.abs(x-middles[0][i])))>.5);
+  assert.ok(Math.max(...middles[2].map((x,i)=>Math.abs(x-middles[0][i])))>.5);
+  assert.notDeepEqual(middles[1],middles[2]);
+});

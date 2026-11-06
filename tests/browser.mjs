@@ -27,21 +27,59 @@ try {
   const cases=[];
   for(const id of ['stand','raise','reach']){
     await page.selectOption('#motion',id);await page.waitForFunction(()=>!window.__R1_DEBUG__.app.busy);
+    assert.equal(await page.evaluate(()=>window.__R1_DEBUG__.app.sim.motionId),id,`UI must activate ${id}, not silently keep the previous reference`);
+    assert.equal(await page.evaluate(()=>window.__R1_DEBUG__.app.sim.motions.get(window.__R1_DEBUG__.app.sim.motionId).name),id);
     for(const spring of [false,true]){
       if(await page.locator('#spring').isChecked()!==spring)await page.locator('label.toggle-row').click();
-      const result=await page.evaluate(async ({spring})=>{
+      const pose=await page.evaluate(async ({spring})=>{
         const d=window.__R1_DEBUG__,s=d.app.sim;if(s.spring!==spring)throw Error('Spring toggle did not reach physics');s.forceLimit=10;s.reset();
-        const result=await d.runSteps(1100);
+        const first=await d.runSteps(250);
+        const names=['left_shoulder_pitch_joint','right_shoulder_pitch_joint','left_elbow_joint','right_elbow_joint'];
+        const indices=names.map(n=>s.config.physical_joint_names.indexOf(n));
+        return {active:s.motionId,peakForce:first.peakForce,reference:indices.map(i=>s.referenceData.qpos[s.qids[i]]),
+          measured:indices.map(i=>s.physicalQ()[i]),observation:indices.map(i=>s.lastObservation[23+i])};
+      },{spring});
+      assert.equal(pose.active,id);
+      for(let i=0;i<4;i++)assert.ok(Math.abs(pose.reference[i]-pose.observation[i])<1e-6,'Selected arm targets must actually enter the policy observation');
+      if(!spring&&id!=='stand')await page.screenshot({path:`test-results/motion-${id}.png`,fullPage:true});
+      const result=await page.evaluate(async()=>{
+        const d=window.__R1_DEBUG__,s=d.app.sim;
+        const result=await d.runSteps(850);
         result.physicsTime=s.data.time;result.referenceFrame=s.frame;result.boot=s.lastObservation[0];
         return result;
-      },{spring});
+      });
+      result.peakForce=Math.max(result.peakForce,pose.peakForce);
       assert.equal(result.steps,1100);assert.equal(result.fault,null);assert.ok(result.root[2]>.4);
       assert.ok(Math.abs(result.physicsTime-22)<1e-7);assert.equal(result.referenceFrame,99);assert.equal(result.boot,0);
       assert.ok(spring?result.peakForce>1:result.peakForce===0);
-      cases.push({id,spring,...result});console.log('CASE',cases.at(-1));
+      cases.push({id,spring,pose,...result});console.log('CASE',cases.at(-1));
     }
   }
+  for(const spring of [false,true]){
+    const baseline=cases.find(c=>c.id==='stand'&&c.spring===spring).pose.measured;
+    for(const id of ['raise','reach']){
+      const p=cases.find(c=>c.id===id&&c.spring===spring).pose;
+      assert.ok(Math.abs(p.measured[0]-baseline[0])>.25&&Math.abs(p.measured[1]-baseline[1])>.25,`${id}: both real shoulders must move relative to standing`);
+    }
+    const raise=cases.find(c=>c.id==='raise'&&c.spring===spring).pose.measured;
+    const reach=cases.find(c=>c.id==='reach'&&c.spring===spring).pose.measured;
+    assert.ok(Math.max(...raise.map((x,i)=>Math.abs(x-reach[i])))>.1,'Raise and reach must produce distinct physical arm poses');
+  }
   if(await page.locator('#spring').isChecked())await page.locator('label.toggle-row').click();
+  const conditionedMotionPoses=[];
+  for(const force of [5,15])for(const id of ['raise','reach']){
+    await page.locator('#force-limit').fill(String(force));await page.selectOption('#motion',id);
+    await page.waitForFunction(()=>!window.__R1_DEBUG__.app.busy);
+    const p=await page.evaluate(async()=>{
+      const d=window.__R1_DEBUG__,s=d.app.sim;s.reset();await d.runSteps(250);
+      const indices=['left','right'].map(side=>s.config.physical_joint_names.indexOf(side+'_shoulder_pitch_joint'));
+      return {active:s.motionId,force:s.forceLimit,shoulders:indices.map(i=>s.physicalQ()[i]),fault:s.fault};
+    });
+    assert.equal(p.active,id);assert.equal(p.force,force);assert.equal(p.fault,null);
+    assert.ok(p.shoulders.every(q=>q<.1),'Both shoulders must move at the end points of the force-conditioning range');
+    conditionedMotionPoses.push(p);
+  }
+  await page.locator('#force-limit').fill('10');
   // Independent WASM standing regression: fixed world camera, no foot anchoring.
   await page.selectOption('#motion','stand');await page.waitForFunction(()=>!window.__R1_DEBUG__.app.busy);
   const standing=await page.evaluate(async()=>{
@@ -62,6 +100,10 @@ try {
   // Normal UI operates the same engine; no test-only motion path.
   await page.click('#play');await page.waitForFunction(()=>window.__R1_DEBUG__.app.sim.steps>3005);
   assert.equal(await page.evaluate(()=>window.__R1_DEBUG__.app.playing),true);await page.click('#play');
+  await page.click('#play');await page.selectOption('#motion','raise');
+  await page.waitForFunction(()=>!window.__R1_DEBUG__.app.busy);
+  assert.deepEqual(await page.evaluate(()=>({motion:window.__R1_DEBUG__.app.sim.motionId,playing:window.__R1_DEBUG__.app.playing})),{motion:'raise',playing:true});
+  await page.click('#play');
   await page.click('#reset');await page.click('#play');await page.waitForFunction(()=>window.__R1_DEBUG__.app.sim.steps>=10);
   await page.click('#play');const paused=await page.evaluate(()=>window.__R1_DEBUG__.app.playing);assert.equal(paused,false);
   await page.click('#reset');await page.click('#push');
@@ -103,8 +145,33 @@ try {
   await page.setViewportSize({width:390,height:844});await page.waitForTimeout(300);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await page.screenshot({path:'test-results/mobile.png',fullPage:true});
+  // A separate page injects network failures/reordering; positive physics
+  // evidence above always uses the actual unmodified application assets.
+  const faultPage=await browser.newPage({viewport:{width:1100,height:900}}),faultErrors=[];
+  faultPage.on('pageerror',error=>faultErrors.push(error.message));
+  await faultPage.goto(base,{waitUntil:'networkidle',timeout:120000});
+  await faultPage.waitForFunction(()=>window.__R1_DEBUG__?.app.loaded,null,{timeout:120000});
+  const raiseFile=await faultPage.evaluate(()=>window.__R1_DEBUG__.app.sim.config.motions.find(m=>m.id==='raise').file);
+  const pattern='**/'+raiseFile;
+  await faultPage.route(pattern,route=>route.abort('failed'));
+  await faultPage.selectOption('#motion','raise');await faultPage.waitForFunction(()=>!window.__R1_DEBUG__.app.busy);
+  const rollback=await faultPage.evaluate(()=>({active:window.__R1_DEBUG__.app.sim.motionId,selected:document.querySelector('#motion').value,status:document.querySelector('#status-text').textContent,playing:window.__R1_DEBUG__.app.playing}));
+  assert.deepEqual(rollback,{active:'stand',selected:'stand',status:'切换失败',playing:false});
+  await faultPage.unroute(pattern);
+  let release;const gate=new Promise(resolve=>{release=resolve;});
+  await faultPage.route(pattern,async route=>{await gate;await route.continue();});
+  await faultPage.selectOption('#motion','raise');await faultPage.waitForFunction(()=>window.__R1_DEBUG__.app.busy);
+  assert.equal(await faultPage.locator('#play').isDisabled(),true);
+  await faultPage.selectOption('#motion','reach');await faultPage.waitForFunction(()=>!window.__R1_DEBUG__.app.busy);
+  assert.equal(await faultPage.evaluate(()=>window.__R1_DEBUG__.app.sim.motionId),'reach');
+  const oldResponse=faultPage.waitForResponse(r=>r.url().endsWith(raiseFile));release();await oldResponse;
+  await faultPage.waitForFunction(()=>window.__R1_DEBUG__.app.sim.motions.has('raise'));
+  assert.deepEqual(await faultPage.evaluate(()=>({active:window.__R1_DEBUG__.app.sim.motionId,selected:document.querySelector('#motion').value})),{active:'reach',selected:'reach'});
+  assert.ok((await faultPage.locator('#motion-description').innerText()).includes('双臂前伸'));
+  assert.deepEqual(faultErrors,[]);await faultPage.close();
   assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
   fs.writeFileSync('test-results/browser.json',JSON.stringify({status:'passed',url:base,maxAbsoluteActionError:maxError,cases,standing,
+    motionSwitching:{identityChecked:true,physicalArmMotionChecked:true,conditionedMotionPoses,resumeWhilePlaying:true,failedLoadRollback:rollback,latestSelectionWins:true},
     interaction:{push10N:true,dragPeakForce:dragResult.peakForce,releaseClearsForce:true,robotDragWithoutModifier:true,blankDragRotatesCamera:true},consoleErrors:errors,failedResponses:requests},null,2));
   console.log('BROWSER_ACCEPTANCE_PASSED');
 } catch(error){await page.screenshot({path:'test-results/failure.png',fullPage:true}).catch(()=>{});fs.writeFileSync('test-results/failure.json',JSON.stringify({error:error.stack,pageErrors:errors,failedResponses:requests},null,2));throw error;}finally{await browser.close();}
