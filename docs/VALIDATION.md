@@ -25,8 +25,10 @@
 
 界限：短参考/有限站立验收不是完整训练质量评估；5–15 N是网络条件，不是接触力保证。仍存在足部摆动/位移。接触模型修正不等于训练提升，不用于实机或人体接触验收。训练源代码、配置、数据、权重及原部署/评估模型未改动。
 
-本轮公开网址已完成上述全套验收，部署来源`e170770`，见[成功工作流](https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42253968039)。本机、云端与公网WASM的60秒站立位移均约8.24/1.27 mm；公网完整验收耗时约2分06秒、内存峰值约1 GiB。
+本轮公开网址已完成上述全套验收，部署来源`9fbd38c`；动作切换修复已验证，见[成功工作流](https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42253968039)。本机、云端与公网WASM的60秒站立位移均约8.24/1.27 mm；公网完整验收耗时约2分06秒、内存峰值约1 GiB。
 
 发布期间曾两次在GitHub Pages的`syncing_files`/`updating_pages`阶段触及官方Action硬性10分钟上限（[第一次](https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42249805722)、[第二次](https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42250161392)），数值和浏览器测试均已通过。重新保存发布源、标记旧部署失效并重试后成功；现发布器保留官方OIDC/产物授权，以25分钟有界监控替代10分钟强制取消。不能由一次成功重试确定平台内部的具体故障原因。
 
 动作切换回归更正：此前标为raise/reach的记录没有断言实际motionId，端点速度校验失败后实际仍是stand，旧非站立case标签应作废。站立接触对照不受影响。修正后检查真实motionId、参考/观测目标和第5秒的实际双臂肩/肘位置，要求与站立及彼此不同；另覆盖5/15 N条件、运行中切换自动继续、加载失败回滚、延迟请求不能覆盖后选动作。网络失败和乱序测试在独立页面刻意注入；正常物理验收不替换资源。细节见`MOTION_SWITCH_FIX.md`。
+
+最新公网回归还确认了实际`stand/raise/reach`动作ID、双臂运动和失败回滚，结果见`validation-public.json`的`motionSwitching`。
