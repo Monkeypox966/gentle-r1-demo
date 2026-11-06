@@ -6,7 +6,7 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 export class Viewer {
   constructor(container,simulation) {
     this.sim=simulation;this.container=container;this.scene=new THREE.Scene();
-    this.scene.background=new THREE.Color('#f3f1ec');this.scene.fog=new THREE.Fog('#f3f1ec',8,20);
+    this.scene.background=new THREE.Color('#c4cbd0');this.scene.fog=new THREE.Fog('#c4cbd0',8,20);
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'low-power'});
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.75));
     this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -21,13 +21,13 @@ export class Viewer {
     const key=new THREE.DirectionalLight(0xfff4e6,2);key.position.set(2,-3,5);key.castShadow=true;
     key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.normalBias=.015;this.scene.add(key);
     const rim=new THREE.DirectionalLight(0xb3d6d1,1);rim.position.set(-3,1,3);this.scene.add(rim);
-    const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshStandardMaterial({color:0xece9e2,roughness:.96}));
+    const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshStandardMaterial({color:0xa5adb5,roughness:.96}));
     ground.position.z=-.002;ground.receiveShadow=true;this.scene.add(ground);
-    const grid=new THREE.GridHelper(40,100,0xc7c3b9,0xd8d3ca);grid.rotation.x=Math.PI/2;grid.position.z=.001;grid.material.transparent=true;grid.material.opacity=.28;this.scene.add(grid);
+    const grid=new THREE.GridHelper(40,100,0x6c7b87,0x87949e);grid.rotation.x=Math.PI/2;grid.position.z=.001;grid.material.transparent=true;grid.material.opacity=.45;this.scene.add(grid);
     this.geometries=new Map();this.meshes=this.buildRobot(false);this.ghosts=this.buildRobot(true);
-    this.ghostVisible=false;this.follow=true;this.previousRoot=new THREE.Vector3(...simulation.root);
+    this.ghostVisible=false;this.follow=false;this.previousRoot=new THREE.Vector3(...simulation.root);
     this.forceArrows=Array.from({length:4},()=>{const a=new THREE.ArrowHelper(new THREE.Vector3(1,0,0),new THREE.Vector3(),.2,0xdc6b35,.045,.022);a.visible=false;this.scene.add(a);return a;});
-    this.raycaster=new THREE.Raycaster();this.pointer=new THREE.Vector2();this.plane=new THREE.Plane();this.dragMode=false;
+    this.raycaster=new THREE.Raycaster();this.pointer=new THREE.Vector2();this.plane=new THREE.Plane();this.dragPointer=null;
     this.bindDrag();this.resizeObserver=new ResizeObserver(()=>this.resize());this.resizeObserver.observe(container);this.resize();
     this.animate=this.animate.bind(this);this.lastFrame=performance.now();this.frames=0;this.fps=0;this.frameStart=this.lastFrame;this.animate();
   }
@@ -65,15 +65,16 @@ export class Viewer {
       mesh.quaternion.setFromRotationMatrix(matrix);
     }
   }
-  home(){this.camera.position.set(2.2,-2.25,1.45);this.controls.target.set(0,0,.68);this.controls.update();}
+  home(){const [x,y,z]=this.sim.root;this.camera.position.set(x+2.2,y-2.25,z+.68);this.controls.target.set(x,y,z-.09);this.controls.update();}
   resize(){const {width,height}=this.container.getBoundingClientRect();this.renderer.setSize(width,height);this.camera.aspect=width/Math.max(height,1);this.camera.updateProjectionMatrix();}
   pick(event){const rect=this.renderer.domElement.getBoundingClientRect();this.pointer.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);this.raycaster.setFromCamera(this.pointer,this.camera);return this.raycaster.intersectObjects(this.meshes,false)[0];}
   bindDrag(){
     const canvas=this.renderer.domElement;
     canvas.addEventListener('pointerdown',event=>{
-      if(!(event.shiftKey||this.dragMode)||event.button!==0)return;
+      if(event.button!==0)return;
+      this.updateMeshes(this.meshes,this.sim.data);
       const hit=this.pick(event);if(!hit)return;
-      event.preventDefault();this.controls.enabled=false;canvas.setPointerCapture(event.pointerId);
+      event.preventDefault();event.stopImmediatePropagation();this.controls.enabled=false;this.dragPointer=event.pointerId;canvas.setPointerCapture(event.pointerId);canvas.style.cursor='crosshair';
       const body=hit.object.userData.body,p=this.sim.data.xpos.slice(body*3,body*3+3),r=this.sim.data.xmat.slice(body*9,body*9+9);
       const delta=hit.point.toArray().map((x,i)=>x-p[i]);
       const local=[0,1,2].map(i=>r[i]*delta[0]+r[3+i]*delta[1]+r[6+i]*delta[2]);
@@ -87,9 +88,13 @@ export class Viewer {
       if(this.raycaster.ray.intersectPlane(this.plane,point))this.sim.drag.anchor=point.toArray();
     });
     const stop=()=>this.releaseDrag();
-    canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);window.addEventListener('blur',stop);
+    canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);canvas.addEventListener('lostpointercapture',stop);window.addEventListener('blur',stop);
   }
-  releaseDrag(){this.dragging=false;this.sim.drag=null;this.controls.enabled=true;}
+  releaseDrag(){
+    const id=this.dragPointer,canvas=this.renderer.domElement;this.dragPointer=null;
+    this.dragging=false;this.sim.drag=null;this.controls.enabled=true;canvas.style.cursor='';
+    if(id!==null&&canvas.hasPointerCapture(id))canvas.releasePointerCapture(id);
+  }
   animate(){
     if(this.disposed)return;this.raf=requestAnimationFrame(this.animate);
     this.updateMeshes(this.meshes,this.sim.data);this.updateMeshes(this.ghosts,this.sim.referenceData,this.ghostVisible);

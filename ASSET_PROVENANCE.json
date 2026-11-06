@@ -49,10 +49,22 @@
     "mujoco/meshes/right_wrist_roll_link.STL": "1e2a25fb75935db59d841f23b5a90b7a0970fbb8d5ce282690d9a3bdda430a68",
     "mujoco/meshes/waist_roll_link.STL": "543684fffebaa20a7869bec461d463ef158915c5bcd224dee1de6e4ff88ba860",
     "mujoco/meshes/waist_yaw_link.STL": "30871f7060d90940f47f28faebf2e16f5c368af1bec90f0a1e3f6ec94355943b",
-    "mujoco/r1.xml": "4e0d65ed3fa5a218c632b73c2c87d78e69b3ec8c0445ddadeaac0b931ee041ca",
+    "mujoco/r1-contact-63b02c43e430.xml": "63b02c43e430ad5055b523abb19726d5630d3a0c6107beb814d5e5d156540f15",
+    "mujoco/r1.xml": "63b02c43e430ad5055b523abb19726d5630d3a0c6107beb814d5e5d156540f15",
     "policy.onnx": "726ca9fd62520498125186e19a5fbc1d9e8d6607245852ca91cb167592d6df21",
     "raise.json": "5b8d9840f8834ab53aa7cf279d54f039d10b73bda37d373aa82ce2044113b6bd",
     "reach.json": "561bf8f6dc13ee5d804cbee7249e7e9646670871ac7f38266f1e2c52022c19b9",
     "stand.json": "12a5b12de6058d76fe77ae143c2c41c24aa65a8e38abfb69e69fd82a9742a55a"
+  },
+  "browser_model_changes": {
+    "source_model_sha256": "4e0d65ed3fa5a218c632b73c2c87d78e69b3ec8c0445ddadeaac0b931ee041ca",
+    "option": {
+      "timestep": "0.001",
+      "cone": "elliptic",
+      "impratio": "10",
+      "noslip_iterations": "20"
+    },
+    "friction_unchanged": 1.0,
+    "reason": "Contact-accuracy audit; policy 50Hz and target filter 200Hz unchanged; no foot pinning."
   }
 }

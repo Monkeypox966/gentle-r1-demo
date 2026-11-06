@@ -7,6 +7,7 @@ import json
 import hashlib
 import shutil
 import sys
+import xml.etree.ElementTree as ET
 import numpy as np
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -21,12 +22,24 @@ def main():
     mf=json.loads((SOURCE/'manifest.json').read_text())
     assert mf['checkpoint_sha256']=='61a5b331557f8e031de4f05fd71b48f58892e8d020578eaaeb1ea45f104af9c5'
     out=ROOT/'public/assets/r1';out.mkdir(parents=True,exist_ok=True)
+    for pattern in ['config-*.json','mujoco/r1-contact-*.xml']:
+        for old in out.glob(pattern): old.unlink()
     shutil.copy2(SOURCE/'policy.onnx',out/'policy.onnx')
     shutil.copytree(SOURCE/'mujoco',out/'mujoco',dirs_exist_ok=True)
+    source_model_sha=sha256(SOURCE/'mujoco/r1.xml')
+    model=ET.parse(out/'mujoco/r1.xml')
+    contact_settings={'timestep':'0.001','cone':'elliptic','impratio':'10','noslip_iterations':'20'}
+    model.getroot().find('option').attrib.update(contact_settings)
+    model.write(out/'mujoco/r1.xml',encoding='unicode')
+    model_file=f'mujoco/r1-contact-{sha256(out/"mujoco/r1.xml")[:12]}.xml'
+    shutil.copy2(out/'mujoco/r1.xml',out/model_file)
     config={k:mf[k] for k in ['schema_version','robot','checkpoint_sha256','observation_dim','action_dim',
         'physical_joint_names','observation_joint_names','reference_joint_names','action_joint_names',
         'control_dt','filter_dt','kp','kd','effort','velocity','lower','upper','default','default_root_height','action_scale']}
     config['onnx_sha256']=sha256(out/'policy.onnx')
+    config['physics_dt']=.001
+    config['browser_contact_solver']=contact_settings
+    config['model_file']=model_file
     config['motions']=[]
     count=501;t=np.arange(count)*.02
     # Smooth endpoints: no loop discontinuity, at most moderate arm excursions.
@@ -55,6 +68,10 @@ def main():
         motions[name]=motion
     config['files']={str(p.relative_to(out)):sha256(p) for p in sorted(out.rglob('*')) if p.is_file() and p.name!='config.json'}
     (out/'config.json').write_text(json.dumps(config,indent=2,ensure_ascii=False)+'\n')
+    config_file=f'config-{sha256(out/"config.json")[:12]}.json'
+    shutil.copy2(out/'config.json',out/config_file)
+    (ROOT/'src/bundle.js').write_text('// Generated asset-version boundary; avoids mixing cached contact models.\n'
+        +f'export const CONFIG_FILE = "{config_file}";\n')
     # Independent Python oracle for JS observation, filter and policy tests.
     rng=np.random.default_rng(731);oracle=[]
     for j in range(8):
@@ -82,7 +99,9 @@ def main():
     (fixture/'actions.json').write_text(json.dumps(filter_cases,separators=(',',':')))
     (ROOT/'ASSET_PROVENANCE.json').write_text(json.dumps({'checkpoint_sha256':config['checkpoint_sha256'],
         'onnx_sha256':config['onnx_sha256'],'mujoco_version':'3.12.0','motion_source':'original synthetic references',
-        'source_training_project':'gentle-r1','raw_training_data_included':False,'assets':config['files']},indent=2)+'\n')
+        'source_training_project':'gentle-r1','raw_training_data_included':False,'assets':config['files'],
+        'browser_model_changes':{'source_model_sha256':source_model_sha,'option':contact_settings,
+          'friction_unchanged':1.0,'reason':'Contact-accuracy audit; policy 50Hz and target filter 200Hz unchanged; no foot pinning.'}},indent=2)+'\n')
     print('Exported frozen R1 model and three original reference motions')
 
 

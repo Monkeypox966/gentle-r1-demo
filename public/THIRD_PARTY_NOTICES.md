@@ -10,7 +10,7 @@ The original browser application and synthetic reference motions are provided un
 | [MuJoCo](https://github.com/google-deepmind/mujoco) 3.12.0 | Google DeepMind; official unmodified single-thread WASM runtime | [Apache-2.0](licenses/mujoco.txt) |
 | [Three.js](https://github.com/mrdoob/three.js) 0.181.0 | three.js authors | [MIT](licenses/three.txt) |
 | [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) 1.26.0 | Microsoft Corporation | [MIT](licenses/ort.txt), [third-party notices](licenses/ort-third-party.txt) |
-| [Unitree ROS R1 description](https://github.com/unitreerobotics/unitree_ros) | Copyright (c) 2016–2022 HangZhou YuShu TECHNOLOGY CO., LTD. (Unitree Robotics). R1 meshes; derived MJCF has floating base, position servos and deployment-compatible settings | [BSD-3-Clause](licenses/unitree.txt) |
+| [Unitree ROS R1 description](https://github.com/unitreerobotics/unitree_ros) | Copyright (c) 2016–2022 HangZhou YuShu TECHNOLOGY CO., LTD. (Unitree Robotics). R1 meshes; derived MJCF has floating base, position servos and explicit browser contact refinement (1 ms integration, elliptic cone, impratio 10, NoSlip20; unchanged friction 1.0) | [BSD-3-Clause](licenses/unitree.txt) |
 
 The original synthetic stand/raise/reach reference JSON files contain no excerpts from LAFAN, AMASS, InterX or the original viewer's recorded motions. Training dataset licenses are not extended by this repository. Names and trademarks identify research and model sources; no endorsement is implied.
 

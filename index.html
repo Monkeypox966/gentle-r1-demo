@@ -9,46 +9,40 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23096962'/%3E%3Cpath d='M19 24h26v21H19zM25 17h14v7H25z' fill='none' stroke='%23fff' stroke-width='3'/%3E%3Cpath d='M25 33h4m6 0h4' stroke='%23fff' stroke-width='3'/%3E%3C/svg%3E" />
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="./" aria-label="Gentle R1 首页"><span class="brand-mark">G<span>r</span></span><span>Gentle <b>R1</b></span><span class="brand-tag">POLICY PLAYGROUND</span></a>
-    <nav><button id="about-button" class="text-button">关于这个演示 <span>↗</span></button><a href="https://github.com/Monkeypox966/gentle-r1-demo" target="_blank" rel="noopener">源码 <span>↗</span></a></nav>
-  </header>
   <main>
-    <section class="intro"><div><p class="eyebrow"><span class="dot"></span> 训练后的策略 · 浏览器实时运行</p><h1>从训练，到你眼前。</h1><p class="subtitle">用鼠标施加扰动，观察 R1 的全身运动与柔顺响应。</p></div><div class="intro-note"><span>UNITREE R1</span><b>26<span> 物理关节</span> / 24<span> 策略动作</span></b></div></section>
     <section class="playground" aria-label="交互仿真工作区">
       <div class="viewport-wrap">
         <div id="viewport"></div>
         <div class="viewport-top"><span class="status-pill" id="status-pill"><span class="dot"></span><span id="status-text">正在准备</span></span><span class="engine-label">MuJoCo 3.12 · ONNX WASM</span></div>
-        <div id="loading" class="loading"><div class="loading-symbol">R1</div><h2>把实验室带进浏览器</h2><p id="loading-text">正在准备模型与引擎</p><div class="progress-track"><div id="loading-progress"></div></div><span>资源原始体积约 50 MB，首次加载请稍候</span></div>
+        <div id="loading" class="loading"><h2>载入 R1 仿真</h2><p id="loading-text">正在准备模型与引擎</p><div class="progress-track"><div id="loading-progress"></div></div><span>资源原始体积约 50 MB，首次加载请稍候</span></div>
         <div class="scene-tools"><button id="home-camera" title="重置视角" aria-label="重置视角">⌂</button><button id="ghost-button" title="显示参考姿态" aria-label="显示参考姿态" aria-pressed="false">◇</button><button id="fullscreen-button" title="全屏" aria-label="全屏">⛶</button></div>
-        <div class="viewport-bottom"><span id="interaction-hint"><kbd>拖动</kbd> 旋转视角　<kbd>滚轮</kbd> 缩放　<kbd>Shift + 拖动机器人</kbd> 施力</span><span id="fps">— FPS</span></div>
+        <div class="viewport-bottom"><span id="interaction-hint">拖动机器人施力 · 拖动空白处旋转 · 滚轮缩放</span><span id="fps">— FPS</span></div>
       </div>
       <aside class="panel">
-        <div class="panel-title"><div><span class="eyebrow">EXPERIMENT CONTROLS</span><h2>探索策略</h2></div><span class="panel-index">01—03</span></div>
+        <div class="panel-title"><h1>R1 策略仿真</h1><button id="about-button" class="text-button" title="模型与方法说明">说明</button></div>
         <fieldset id="controls" disabled>
-          <label class="field-label" for="motion">01 <span>参考动作</span></label>
+          <label class="field-label" for="motion"><span>参考动作</span></label>
           <div class="select-wrap"><select id="motion"><option value="stand">自然站立</option><option value="raise">双臂抬起</option><option value="reach">双臂前伸</option></select></div>
-          <p class="field-note" id="motion-description">固定的 R1 默认参考，观察策略如何维持平衡。</p>
+          <p class="field-note" id="motion-description">固定站立参考；仿真持续运行。</p>
           <div class="play-row"><button id="play" class="primary-button"><span id="play-icon">▶</span><span id="play-label">运行策略</span></button><button id="reset" class="secondary-button" aria-label="复位仿真" title="复位仿真">↺</button></div>
-          <div class="time-row"><span id="time">0.00 s</span><span>10.00 s / 片段</span></div><div class="timeline"><div id="timeline-progress"></div></div>
+          <div class="time-row"><span>仿真时间 <output id="time">0.00 s</output></span><span>连续运行</span></div>
           <div class="divider"></div>
-          <label class="field-label" for="force-limit">02 <span>柔顺力条件</span><output id="force-value">10<span> N</span></output></label>
+          <label class="field-label" for="force-limit"><span>柔顺力条件</span><output id="force-value">10<span> N</span></output></label>
           <input id="force-limit" type="range" min="5" max="15" value="10" step="1" /><div class="range-labels"><span>5 N · 较柔</span><span>15 N · 较强</span></div>
-          <p class="field-note">这是网络的条件输入，实际响应由训练后的策略产生。</p>
+          <p class="field-note">网络条件输入，不是实际接触力上限。</p>
           <div class="divider"></div>
-          <p class="field-label">03 <span>交互扰动</span></p>
-          <label class="toggle-row"><span><b>腕部弹簧</b><small>150 N/m · 1–8 秒平滑加载</small></span><input id="spring" type="checkbox" role="switch" /><span class="switch" aria-hidden="true"></span></label>
-          <div class="interaction-buttons"><button id="drag-mode" class="outline-button" aria-pressed="false">↗ 拖拽施力</button><button id="push" class="outline-button">轻推 10 N</button></div>
+          <p class="field-label"><span>交互扰动</span></p>
+          <label class="toggle-row"><span><b>腕部弹簧</b><small>150 N/m · 平滑加载，关闭时撤力</small></span><input id="spring" type="checkbox" role="switch" /><span class="switch" aria-hidden="true"></span></label>
+          <div class="interaction-buttons"><button id="push" class="outline-button">轻推 10 N</button></div>
           <div class="force-chart-header"><span>当前施加外力</span><output id="measured-force">0.0 <small>N</small></output></div><canvas id="force-chart" height="78" aria-label="当前仿真外力曲线"></canvas>
-          <div class="panel-foot"><span>播放速度</span><div class="speed-buttons" role="group" aria-label="播放速度"><button data-speed="0.5">0.5×</button><button data-speed="1" class="active">1×</button></div></div>
+          <div class="panel-foot"><span>运行速度</span><div class="speed-buttons" role="group" aria-label="播放速度"><button data-speed="0.5">0.5×</button><button data-speed="1" class="active">1×</button></div></div>
+          <div class="runtime-line"><span>控制 50 Hz · 推理 <output id="inference-ms">— ms</output></span><a href="https://github.com/Monkeypox966/gentle-r1-demo" target="_blank" rel="noopener">源码</a></div>
         </fieldset>
+        <p id="message" class="message" role="status" aria-live="polite"></p>
       </aside>
     </section>
-    <section class="metrics" aria-label="实际运行状态"><div><span class="metric-icon">⌁</span><span>策略频率<b>50 <small>Hz</small></b></span></div><div><span class="metric-icon">⟳</span><span>物理步进<b id="physics-steps">0 <small>steps</small></b></span></div><div><span class="metric-icon">◷</span><span>本次推理<b id="inference-ms">— <small>ms</small></b></span></div><div><span class="metric-icon">▱</span><span>运行位置<b>你的浏览器 <small>CPU</small></b></span></div></section>
-    <p id="message" class="message" role="status" aria-live="polite">加载完成后，点击「运行策略」开始。空格暂停，R 复位。</p>
   </main>
-  <footer><div><b>Gentle R1</b><span>基于 GentleHumanoid 的 R1 柔顺运动研究</span></div><div>冻结学生策略 <code>61a5b331…af9c5</code><span class="footer-dot">·</span><button id="limitations-button" class="text-button">方法与边界</button></div></footer>
-  <dialog id="about"><button id="close-about" class="dialog-close" aria-label="关闭">×</button><p class="eyebrow">ABOUT THE EXPERIMENT</p><h2>真实闭环，发生在浏览器里。</h2><p>网页每 20 ms 组装 392 维观测，运行冻结的 R1 学生网络，再以 200 Hz 更新关节目标并推进 MuJoCo 动力学。屏幕上的机器人始终来自当前物理状态。</p><dl><dt>学习方法</dt><dd>GentleHumanoid，适配至 R1 26DOF</dd><dt>训练量</dt><dd>Teacher 40 亿 / Adapt 10 亿 / Finetune 20 亿预算</dd><dt>参考动作</dt><dd>本演示自主生成的平滑参考，不发布训练数据集</dd><dt>头部</dt><dd>保持零位，参与物理和观测，不接收策略动作</dd></dl><p>5–15 N 是策略条件，不是对接触力的保证上限。图表显示模拟施加的外力；本演示没有实机或人体接触验收含义。参考叠影仅用于查看目标姿态。</p><p>改变动作会重新初始化片段；暂停、复位和切换不会训练或更新网络。标签页隐藏时自动暂停。</p><div class="dialog-links"><a href="https://gentle-humanoid.axell.top/" target="_blank" rel="noopener">原始研究 ↗</a><a href="https://github.com/Monkeypox966/gentle-r1-demo" target="_blank" rel="noopener">源码与验证记录 ↗</a><a href="./THIRD_PARTY_NOTICES.md" target="_blank">致谢与许可 ↗</a></div></dialog>
+  <dialog id="about"><button id="close-about" class="dialog-close" aria-label="关闭">×</button><h2>模型与方法</h2><p>网页每 20 ms 组装 392 维观测，运行冻结的 R1 学生网络，再以 200 Hz 更新关节目标并推进 MuJoCo 动力学。屏幕上的机器人始终来自当前物理状态。</p><dl><dt>学习方法</dt><dd>GentleHumanoid，适配至 R1 26DOF</dd><dt>训练量</dt><dd>Teacher 40 亿 / Adapt 10 亿 / Finetune 20 亿预算</dd><dt>参考动作</dt><dd>本演示自主生成的平滑参考，不发布训练数据集</dd><dt>头部</dt><dd>保持零位，参与物理和观测，不接收策略动作</dd></dl><p>5–15 N 是策略条件，不是对接触力的保证上限。图表显示模拟施加的外力；本演示没有实机或人体接触验收含义。参考叠影仅用于查看目标姿态。</p><p>参考动作循环播放，物理状态、动作滤波与观测历史在循环边界连续。仿真没有时长上限；手动暂停、保护触发或标签页隐藏时停止。复位会重新初始化物理状态。</p><div class="dialog-links"><a href="https://gentle-humanoid.axell.top/" target="_blank" rel="noopener">原始研究 ↗</a><a href="https://github.com/Monkeypox966/gentle-r1-demo" target="_blank" rel="noopener">源码与验证记录 ↗</a><a href="./THIRD_PARTY_NOTICES.md" target="_blank">致谢与许可 ↗</a></div></dialog>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

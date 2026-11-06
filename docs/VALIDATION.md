@@ -1,23 +1,26 @@
-# Browser verification
+# 浏览器验收
 
-2026-11-06, production build under `/gentle-r1-demo/`. Verification passed locally, on the GitHub runner, and against the deployed public site.
+2026-11-07：页面精简、连续运行、直接拖拽与接触模型精度修正。物理变化的原因与对照见[接触诊断](CONTACT_AUDIT.md)。
 
-| Environment | Evidence |
+| 环境 | 证据 |
 |---|---|
-| Local production preview | [JSON](validation-local.json) |
-| GitHub runner Chrome | [JSON](validation-ci.json), [successful build + deployment](https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42242653054) |
-| Public GitHub Pages | [JSON](validation-public.json), [live site](https://monkeypox966.github.io/gentle-r1-demo/) |
+| 本机生产构建 | [JSON](validation-local.json) |
+| GitHub runner Chrome | [JSON](validation-ci.json) |
+| 公开GitHub Pages | [JSON](validation-public.json)、[演示](https://monkeypox966.github.io/gentle-r1-demo/) |
 
-Public-site verification fetched the real HTML, JS, WASM, model, motions and weights from GitHub Pages, then ran the full six-case and UI suite. This host used its existing loopback HTTP proxy for public network access. No localhost response substitution or asset interception was used. Public HTTP returned 200 with HTTPS enforced. Application source: `b682333`; documentation-only updates do not change the deployed application.
+验收项：
 
-- Independent Python deployment oracle: eight 392-dimensional observation cases, action-filter history and all four 200 Hz substeps. Observation tolerance 2e-6; filter tolerance 1e-11.
-- Browser ONNX versus Python ONNX: eight observations; maximum absolute action error 1.669e-6 (acceptance threshold 1e-5). The same frozen ONNX is used in both runtimes.
-- Six closed-loop cases: stand, raise and reach, each without and with wrist springs, 10 simulated seconds each. Each performs 500 policy inferences / 2,000 physics steps. All completed with no guard fault and final floating-base height above 0.4 m. These are synthetic-reference functional checks, not a training benchmark.
-- External-force input, actual mesh mouse picking/drag, force release, pause/reset, reference overlay, force-condition UI, method dialog and 390 px mobile overflow are exercised by Playwright.
-- Every policy/model/reference asset is SHA256-checked in unit tests. Runtime also verifies the downloaded ONNX hash.
-- No browser exceptions or HTTP errors are accepted. CI repeats the full acceptance before deployment and saves evidence for 14 days.
-- CI uses the Google Chrome already installed in the pinned Ubuntu 24.04 GitHub runner image (`PLAYWRIGHT_CHANNEL=chrome`); local tests default to Playwright's managed Chromium headless shell. Both use CPU SwiftShader.
+- 8组独立Python观测/ONNX对照，392维观测误差≤2e-6，动作滤波≤1e-11，浏览器ONNX最大绝对误差≤1e-5（实测约1.669e-6）。
+- 7个Node测试，包括完整资产SHA、四种关节顺序、200 Hz滤波、头部零位、力矩预测保护、循环边界future观测不截断或重置。
+- 站立、抬臂、前伸 × 弹簧关/开，六组各22秒，跨越两次参考循环。每组1,100次策略推理、22,000次1 ms物理步；检查MuJoCo真实时间连续、启动计数不重启、根高度和保护状态。
+- 60秒WASM无外力站立：3,000次推理、60,000物理步，脚原点净位移从2秒后开始计算，左右阈值20/15 mm。检查μ不变、1 ms、elliptic、impratio10、NoSlip20；相机不跟随根位置。
+- 从60秒继续正常UI运行，确保播放循环没有隐藏时长上限；保留手动暂停、异常保护和隐藏标签页暂停。
+- 真正鼠标事件：不按Shift直接拖机器人施力，相机不转动；拖空白处旋转，不附着外力。撤力、拖拽中复位、10 N轻推、弹簧开关、参考叠影、说明弹窗、390 px手机布局均覆盖。
+- 页面不含旧顶部导航、hero、底部宣传或指标卡。模型和配置有hash文件名，避免缓存版本混用。
+- 不接受浏览器异常或HTTP错误。CI重复整套浏览器验收，通过后才部署，保留14天证据。
 
-Host verification uses Chromium headless with SwiftShader (CPU rendering), two CPU cores excluding CPU1, 6 GiB hard memory limit, no swap, and the training simulator lock. Initial six-case run peaked at 1.2 GiB. Real-time speed depends on the visitor's browser and hardware; the fixed simulation time steps never change.
+本机使用受限CPU8/9、6 GiB硬限、禁swap、全局仿真锁，软件WebGL/SwiftShader；峰值约1 GiB，不使用NVIDIA或Isaac。CI使用Ubuntu24.04 runner自带Chrome，本机使用Playwright Chromium。公开地址测试通过现有网络代理直接下载GitHub Pages资源，不拦截或替换响应。
 
-Limits: the demo exposes the existing frozen student's response, including imperfect compliance. The 5–15 N input is a learned condition; it is not a contact-force bound. Root stability in six synthetic clips does not establish general motion quality, human-contact safety, hardware readiness, or reproduce the broader frozen evaluation. Original training code/configuration/checkpoint bytes remain unchanged.
+固定50 Hz策略、200 Hz目标滤波/历史采样；浏览器模型细化到1,000 Hz动力学。低性能设备可能降低墙钟速度，但不跳过物理步、不降低滤波频率、不按参考周期复位物理状态。网站运行性能不由软件渲染截图中的FPS代表。
+
+界限：短参考/有限站立验收不是完整训练质量评估；5–15 N是网络条件，不是接触力保证。仍存在足部摆动/位移。接触模型修正不等于训练提升，不用于实机或人体接触验收。训练源代码、配置、数据、权重及原部署/评估模型未改动。

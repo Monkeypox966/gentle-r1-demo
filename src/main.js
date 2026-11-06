@@ -11,18 +11,18 @@ function message(text,error=false){$('message').textContent=text;$('message').cl
 function pause(){app.playing=false;$('play-label').textContent='继续运行';$('play-icon').textContent='▶';if(app.loaded)status(app.sim.fault?'保护暂停':'已暂停',app.sim.fault?'error':'');}
 function play(){
   if(!app.loaded)return;
-  if(app.sim.fault||app.sim.finished)reset();
+  if(app.sim.fault)reset();
   app.playing=true;$('play-label').textContent='暂停';$('play-icon').textContent='Ⅱ';status('策略运行中','running');message('拖拽机器人施力，或开启腕部弹簧，观察策略的响应。');
 }
 function reset(){
   pause();app.viewer.releaseDrag();app.sim.reset();app.forceHistory.fill(0);app.viewer.home();
-  $('play-label').textContent='运行策略';status('已就绪');message('片段已复位。点击「运行策略」开始。');update();
+  $('play-label').textContent='运行策略';status('已就绪');message('');update();
 }
 async function pump(){
   for(;;){
     if(!app.playing||app.busy||document.hidden){await sleep(20);continue;}
     const started=performance.now();
-    try{app.inStep=true;const committed=await app.sim.step();app.inStep=false;if(committed&&app.sim.finished){pause();status('片段完成');$('play-label').textContent='重新运行';message('10 秒片段已完成。可以更换动作或力条件后重新运行。');}}
+    try{app.inStep=true;await app.sim.step();app.inStep=false;}
     catch(error){app.inStep=false;pause();status('保护暂停','error');message(error.message+'，请复位后重试。',true);console.warn('Simulation paused:',error.message);}
     await sleep(Math.max(0,20/app.speed-(performance.now()-started)));
   }
@@ -38,8 +38,7 @@ function chart(){
 }
 function update(){
   if(!app.loaded)return;
-  const s=app.sim;$('time').textContent=s.time.toFixed(2)+' s';$('timeline-progress').style.width=Math.min(100,s.time/s.duration*100)+'%';
-  $('physics-steps').innerHTML=(s.steps*4).toLocaleString()+' <small>steps</small>';
+  const s=app.sim;$('time').textContent=s.time.toFixed(2)+' s';
   $('inference-ms').innerHTML=s.policyMs.toFixed(2)+' <small>ms</small>';$('measured-force').innerHTML=s.lastForce.toFixed(1)+' <small>N</small>';
   $('fps').textContent=app.viewer.fps?Math.round(app.viewer.fps)+' FPS':'— FPS';
   if(app.playing){app.forceHistory.shift();app.forceHistory.push(s.lastForce);}chart();
@@ -55,18 +54,17 @@ async function main(){
 $('play').addEventListener('click',()=>app.playing?pause():play());$('reset').addEventListener('click',reset);
 $('motion').addEventListener('change',async event=>{
   pause();app.viewer.releaseDrag();app.busy=true;status('正在切换');
-  try{await app.sim.selectMotion(event.target.value);app.forceHistory.fill(0);app.viewer.home();$('motion-description').textContent=app.sim.config.motions.find(m=>m.id===event.target.value).description;$('play-label').textContent='运行策略';status('已就绪');message('动作已切换。点击「运行策略」运行新的闭环片段。');}
+  try{await app.sim.selectMotion(event.target.value);app.forceHistory.fill(0);app.viewer.home();$('motion-description').textContent=event.target.value==='stand'?'固定站立参考；仿真持续运行。':'周期参考；循环边界不重置物理状态。';$('play-label').textContent='运行策略';status('已就绪');message('');}
   catch(error){message(error.message,true);status('加载失败','error');}finally{app.busy=false;}
 });
 $('force-limit').addEventListener('input',event=>{const value=Number(event.target.value);$('force-value').innerHTML=value+'<span> N</span>';if(app.sim)app.sim.forceLimit=value;});
-$('spring').addEventListener('change',event=>{app.sim.spring=event.target.checked;message(event.target.checked?'腕部弹簧已开启。为比较相同条件，建议复位后重新运行。':'腕部弹簧已关闭。');});
-$('drag-mode').addEventListener('click',()=>{app.viewer.dragMode=!app.viewer.dragMode;$('drag-mode').setAttribute('aria-pressed',app.viewer.dragMode);message(app.viewer.dragMode?'施力模式：直接拖动机器人；松开立即撤力。':'视角模式：拖动旋转；按 Shift 可临时施力。');});
+$('spring').addEventListener('change',event=>{app.sim.setSpring(event.target.checked);message('');});
 $('push').addEventListener('click',()=>{if(!app.playing)play();app.sim.push();message('向躯干施加 10 N、约 0.25 秒的外力。');});
 $('home-camera').addEventListener('click',()=>app.viewer?.home());
 $('ghost-button').addEventListener('click',()=>{app.viewer.ghostVisible=!app.viewer.ghostVisible;$('ghost-button').setAttribute('aria-pressed',app.viewer.ghostVisible);});
 $('fullscreen-button').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen();else document.querySelector('.viewport-wrap').requestFullscreen?.();});
 document.querySelectorAll('[data-speed]').forEach(button=>button.addEventListener('click',()=>{app.speed=Number(button.dataset.speed);document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b===button));}));
-for(const id of ['about-button','limitations-button'])$(id).addEventListener('click',()=>$('about').showModal());
+$('about-button').addEventListener('click',()=>$('about').showModal());
 $('close-about').addEventListener('click',()=>$('about').close());$('about').addEventListener('click',event=>{if(event.target===$('about')){const r=$('about').getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)$('about').close();}});
 document.addEventListener('keydown',event=>{if(/INPUT|SELECT|BUTTON|TEXTAREA/.test(document.activeElement.tagName)||$('about').open)return;if(event.code==='Space'){event.preventDefault();app.playing?pause():play();}if(event.code==='KeyR'&&app.loaded)reset();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&app.playing){pause();message('标签页已隐藏，仿真自动暂停。');}});

@@ -34,3 +34,16 @@ test('invalid non-finite policy input is rejected before inference',()=>{
   const obs=new Observation(config,config.default);
   assert.throws(()=>obs.compute(motion,0,[1,0,0,0],[0,0,0],Array.from({length:3},()=>new Float64Array(24)),0,NaN));
 });
+test('loop lookahead wraps across the seam instead of clamping or restarting history',()=>{
+  const period=5,ref={loop:true,joint_pos:[],root_pos:[],root_quat:[]};
+  for(let i=0;i<=period;i++){
+    const q=config.default.slice();q[0]=Math.sin(2*Math.PI*i/period);
+    ref.joint_pos.push(q);ref.root_pos.push([0,0,.73]);ref.root_quat.push([1,0,0,0]);
+  }
+  const observer=new Observation(config,config.default);
+  observer.advance([config.default.map(x=>x+.01),config.default.map(x=>x+.01)]);
+  const obs=observer.compute(ref,4,[1,0,0,0],[0,0,0],Array.from({length:3},()=>new Float64Array(24)),99,10);
+  for(const [i,frame] of [4,1,3,2,0].entries())assert.ok(Math.abs(obs[23+i*24]-ref.joint_pos[frame][0])<1e-7);
+  assert.equal(obs[0],0);
+  assert.ok(Math.abs(observer.history[0][0]-observer.history[1][0]-.01)<1e-12);
+});

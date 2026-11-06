@@ -29,7 +29,7 @@ export class Observation {
   }
   compute(motion, frame, quat, gyro, actions, step, force) {
     if (!Number.isFinite(force) || force<5 || force>15) throw Error('力条件超出训练范围');
-    const ids=FUTURE.map(k=>Math.min(frame+k,motion.joint_pos.length-1));
+    const ids=FUTURE.map(k=>motion.loop?(frame+k)%(motion.joint_pos.length-1):Math.min(frame+k,motion.joint_pos.length-1));
     const pos=ids.map(i=>motion.root_pos[i]), qs=ids.map(i=>motion.root_quat[i]);
     const angle=yaw(qs[0]), packed=[Math.max(25-step,0)/25,...pos.map(p=>p[2])];
     for(let i=1;i<5;i++) packed.push(...inverseYaw(angle,pos[i].map((x,j)=>x-pos[0][j])));
