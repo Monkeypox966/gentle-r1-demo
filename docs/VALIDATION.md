@@ -1,6 +1,14 @@
 # Browser verification
 
-2026-11-06, production build under `/gentle-r1-demo/`. See [machine-readable results](validation-local.json).
+2026-11-06, production build under `/gentle-r1-demo/`. Verification passed locally, on the GitHub runner, and against the deployed public site.
+
+| Environment | Evidence |
+|---|---|
+| Local production preview | [JSON](validation-local.json) |
+| GitHub runner Chrome | [JSON](validation-ci.json), [successful build + deployment](https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42242653054) |
+| Public GitHub Pages | [JSON](validation-public.json), [live site](https://monkeypox966.github.io/gentle-r1-demo/) |
+
+Public-site verification fetched the real HTML, JS, WASM, model, motions and weights from GitHub Pages, then ran the full six-case and UI suite. This host used its existing loopback HTTP proxy for public network access. No localhost response substitution or asset interception was used. Public HTTP returned 200 with HTTPS enforced. Application source: `b682333`; documentation-only updates do not change the deployed application.
 
 - Independent Python deployment oracle: eight 392-dimensional observation cases, action-filter history and all four 200 Hz substeps. Observation tolerance 2e-6; filter tolerance 1e-11.
 - Browser ONNX versus Python ONNX: eight observations; maximum absolute action error 1.669e-6 (acceptance threshold 1e-5). The same frozen ONNX is used in both runtimes.

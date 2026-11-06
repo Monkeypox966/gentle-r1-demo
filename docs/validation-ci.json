@@ -1,0 +1,100 @@
+{
+  "status": "passed",
+  "url": "http://127.0.0.1:4173/gentle-r1-demo/",
+  "maxAbsoluteActionError": 1.6689300537109375e-06,
+  "cases": [
+    {
+      "id": "stand",
+      "spring": false,
+      "steps": 500,
+      "time": 10,
+      "root": [
+        -0.02415466701164746,
+        -0.0161689681980099,
+        0.7289450507303014
+      ],
+      "force": 0,
+      "peakForce": 0,
+      "fault": null
+    },
+    {
+      "id": "stand",
+      "spring": true,
+      "steps": 500,
+      "time": 10,
+      "root": [
+        -0.019643391471272816,
+        -0.019068938999023812,
+        0.7304136945114662
+      ],
+      "force": 0,
+      "peakForce": 10.02925965743578,
+      "fault": null
+    },
+    {
+      "id": "raise",
+      "spring": false,
+      "steps": 500,
+      "time": 10,
+      "root": [
+        0.00019416405872082034,
+        -0.05130109035832188,
+        0.7320142295358616
+      ],
+      "force": 0,
+      "peakForce": 0,
+      "fault": null
+    },
+    {
+      "id": "raise",
+      "spring": true,
+      "steps": 500,
+      "time": 10,
+      "root": [
+        0.005642069322128127,
+        -0.050639880420372686,
+        0.7331391672082318
+      ],
+      "force": 0,
+      "peakForce": 6.754429183549256,
+      "fault": null
+    },
+    {
+      "id": "reach",
+      "spring": false,
+      "steps": 500,
+      "time": 10,
+      "root": [
+        -0.02268207839365705,
+        -0.014024546704314283,
+        0.727886892920401
+      ],
+      "force": 0,
+      "peakForce": 0,
+      "fault": null
+    },
+    {
+      "id": "reach",
+      "spring": true,
+      "steps": 500,
+      "time": 10,
+      "root": [
+        -0.021852651580911632,
+        -0.0129880484094652,
+        0.7277759397854502
+      ],
+      "force": 0,
+      "peakForce": 6.328215091251647,
+      "fault": null
+    }
+  ],
+  "interaction": {
+    "push10N": true,
+    "dragPeakForce": 17.15724924959566,
+    "releaseClearsForce": true
+  },
+  "consoleErrors": [],
+  "failedResponses": [],
+  "workflow_url": "https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42242653054",
+  "application_source_commit": "b682333"
+}
