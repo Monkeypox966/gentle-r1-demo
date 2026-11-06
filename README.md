@@ -70,7 +70,7 @@ tests/                 Python 导出的数值对照与真实浏览器验收
 docs/                  精简验证记录与实际截图
 ```
 
-推送 `main` 后，GitHub Actions 自动执行单元测试、构建与真实浏览器验收，全部通过后发布 GitHub Pages。WASM 使用单线程，不依赖 GitHub Pages 无法自定义的跨源隔离响应头。所有运行资源同源托管，没有 CDN 运行依赖。
+推送 `main` 的代码或资源更新后，GitHub Actions 自动执行单元测试、构建与真实浏览器验收，全部通过后发布 GitHub Pages。仅更新README、AGENTS或docs不会重新部署。WASM 使用单线程，不依赖 GitHub Pages 无法自定义的跨源隔离响应头。所有运行资源同源托管，没有 CDN 运行依赖。
 
 修改仓库名时必须同步 `vite.config.js` 的 `base`、测试地址及文档链接。训练代码、数据与历史记录仍在独立的 `gentle-r1` 项目中；本仓库不会启动或改变训练。
 

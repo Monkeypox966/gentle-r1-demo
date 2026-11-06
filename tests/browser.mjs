@@ -28,8 +28,9 @@ try {
   for(const id of ['stand','raise','reach']){
     await page.selectOption('#motion',id);await page.waitForFunction(()=>!window.__R1_DEBUG__.app.busy);
     for(const spring of [false,true]){
+      if(await page.locator('#spring').isChecked()!==spring)await page.locator('label.toggle-row').click();
       const result=await page.evaluate(async ({spring})=>{
-        const d=window.__R1_DEBUG__,s=d.app.sim;s.spring=spring;s.forceLimit=10;s.reset();
+        const d=window.__R1_DEBUG__,s=d.app.sim;if(s.spring!==spring)throw Error('Spring toggle did not reach physics');s.forceLimit=10;s.reset();
         return await d.runSteps(500);
       },{spring});
       assert.equal(result.steps,500);assert.equal(result.fault,null);assert.ok(result.root[2]>.4);
@@ -37,6 +38,7 @@ try {
       cases.push({id,spring,...result});console.log('CASE',cases.at(-1));
     }
   }
+  if(await page.locator('#spring').isChecked())await page.locator('label.toggle-row').click();
   // Normal UI operates the same engine; no test-only motion path.
   await page.click('#reset');await page.click('#play');await page.waitForFunction(()=>window.__R1_DEBUG__.app.sim.steps>=10);
   await page.click('#play');const paused=await page.evaluate(()=>window.__R1_DEBUG__.app.playing);assert.equal(paused,false);
