@@ -81,14 +81,15 @@ export class Viewer {
       this.sim.drag={body,local,anchor:hit.point.toArray()};this.dragging=true;
     },true);
     canvas.addEventListener('pointermove',event=>{
-      if(!this.dragging)return;
+      if(!this.dragging||!this.sim.drag)return;
       const rect=canvas.getBoundingClientRect();this.pointer.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);
       this.raycaster.setFromCamera(this.pointer,this.camera);const point=new THREE.Vector3();
       if(this.raycaster.ray.intersectPlane(this.plane,point))this.sim.drag.anchor=point.toArray();
     });
-    const stop=()=>{this.dragging=false;this.sim.drag=null;this.controls.enabled=true;};
+    const stop=()=>this.releaseDrag();
     canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);window.addEventListener('blur',stop);
   }
+  releaseDrag(){this.dragging=false;this.sim.drag=null;this.controls.enabled=true;}
   animate(){
     if(this.disposed)return;this.raf=requestAnimationFrame(this.animate);
     this.updateMeshes(this.meshes,this.sim.data);this.updateMeshes(this.ghosts,this.sim.referenceData,this.ghostVisible);

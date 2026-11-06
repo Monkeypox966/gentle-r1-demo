@@ -8,6 +8,7 @@
 - External-force input, actual mesh mouse picking/drag, force release, pause/reset, reference overlay, force-condition UI, method dialog and 390 px mobile overflow are exercised by Playwright.
 - Every policy/model/reference asset is SHA256-checked in unit tests. Runtime also verifies the downloaded ONNX hash.
 - No browser exceptions or HTTP errors are accepted. CI repeats the full acceptance before deployment and saves evidence for 14 days.
+- CI uses the Google Chrome already installed in the pinned Ubuntu 24.04 GitHub runner image (`PLAYWRIGHT_CHANNEL=chrome`); local tests default to Playwright's managed Chromium headless shell. Both use CPU SwiftShader.
 
 Host verification uses Chromium headless with SwiftShader (CPU rendering), two CPU cores excluding CPU1, 6 GiB hard memory limit, no swap, and the training simulator lock. Initial six-case run peaked at 1.2 GiB. Real-time speed depends on the visitor's browser and hardware; the fixed simulation time steps never change.
 

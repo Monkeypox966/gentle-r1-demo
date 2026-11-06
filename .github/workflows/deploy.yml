@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
@@ -26,8 +26,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium --only-shell
       - name: Verify production site in a real browser
+        env:
+          PLAYWRIGHT_CHANNEL: chrome
         run: |
           npm run preview -- --port 4173 > /tmp/r1-preview.log 2>&1 &
           preview_pid=$!
@@ -48,7 +49,7 @@ jobs:
           path: dist
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pages: write

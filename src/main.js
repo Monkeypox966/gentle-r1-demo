@@ -15,7 +15,7 @@ function play(){
   app.playing=true;$('play-label').textContent='暂停';$('play-icon').textContent='Ⅱ';status('策略运行中','running');message('拖拽机器人施力，或开启腕部弹簧，观察策略的响应。');
 }
 function reset(){
-  pause();app.sim.reset();app.forceHistory.fill(0);app.viewer.home();
+  pause();app.viewer.releaseDrag();app.sim.reset();app.forceHistory.fill(0);app.viewer.home();
   $('play-label').textContent='运行策略';status('已就绪');message('片段已复位。点击「运行策略」开始。');update();
 }
 async function pump(){
@@ -54,7 +54,7 @@ async function main(){
 }
 $('play').addEventListener('click',()=>app.playing?pause():play());$('reset').addEventListener('click',reset);
 $('motion').addEventListener('change',async event=>{
-  pause();app.busy=true;status('正在切换');
+  pause();app.viewer.releaseDrag();app.busy=true;status('正在切换');
   try{await app.sim.selectMotion(event.target.value);app.forceHistory.fill(0);app.viewer.home();$('motion-description').textContent=app.sim.config.motions.find(m=>m.id===event.target.value).description;$('play-label').textContent='运行策略';status('已就绪');message('动作已切换。点击「运行策略」运行新的闭环片段。');}
   catch(error){message(error.message,true);status('加载失败','error');}finally{app.busy=false;}
 });
