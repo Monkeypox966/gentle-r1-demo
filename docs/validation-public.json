@@ -6,96 +6,142 @@
     {
       "id": "stand",
       "spring": false,
-      "steps": 500,
-      "time": 10,
+      "steps": 1100,
+      "time": 22,
       "root": [
-        -0.02415466701164746,
-        -0.0161689681980099,
-        0.7289450507303014
+        -0.010847060129548574,
+        -0.009588037355594816,
+        0.7306207551907016
       ],
       "force": 0,
       "peakForce": 0,
-      "fault": null
+      "fault": null,
+      "physicsTime": 22.000000000003904,
+      "referenceFrame": 99,
+      "boot": 0
     },
     {
       "id": "stand",
       "spring": true,
-      "steps": 500,
-      "time": 10,
+      "steps": 1100,
+      "time": 22,
       "root": [
-        -0.019643391471272816,
-        -0.019068938999023812,
-        0.7304136945114662
+        -0.02427893678022773,
+        -0.015810939015567838,
+        0.7263922199060028
       ],
-      "force": 0,
-      "peakForce": 10.02925965743578,
-      "fault": null
+      "force": 9.322772823630357,
+      "peakForce": 9.845932493128586,
+      "fault": null,
+      "physicsTime": 22.000000000003904,
+      "referenceFrame": 99,
+      "boot": 0
     },
     {
       "id": "raise",
       "spring": false,
-      "steps": 500,
-      "time": 10,
+      "steps": 1100,
+      "time": 22,
       "root": [
-        0.00019416405872082034,
-        -0.05130109035832188,
-        0.7320142295358616
+        -0.010847060129548574,
+        -0.009588037355594816,
+        0.7306207551907016
       ],
       "force": 0,
       "peakForce": 0,
-      "fault": null
+      "fault": null,
+      "physicsTime": 22.000000000003904,
+      "referenceFrame": 99,
+      "boot": 0
     },
     {
       "id": "raise",
       "spring": true,
-      "steps": 500,
-      "time": 10,
+      "steps": 1100,
+      "time": 22,
       "root": [
-        0.005642069322128127,
-        -0.050639880420372686,
-        0.7331391672082318
+        -0.02427893678022773,
+        -0.015810939015567838,
+        0.7263922199060028
       ],
-      "force": 0,
-      "peakForce": 6.754429183549256,
-      "fault": null
+      "force": 9.322772823630357,
+      "peakForce": 9.845932493128586,
+      "fault": null,
+      "physicsTime": 22.000000000003904,
+      "referenceFrame": 99,
+      "boot": 0
     },
     {
       "id": "reach",
       "spring": false,
-      "steps": 500,
-      "time": 10,
+      "steps": 1100,
+      "time": 22,
       "root": [
-        -0.02268207839365705,
-        -0.014024546704314283,
-        0.727886892920401
+        -0.010847060129548574,
+        -0.009588037355594816,
+        0.7306207551907016
       ],
       "force": 0,
       "peakForce": 0,
-      "fault": null
+      "fault": null,
+      "physicsTime": 22.000000000003904,
+      "referenceFrame": 99,
+      "boot": 0
     },
     {
       "id": "reach",
       "spring": true,
-      "steps": 500,
-      "time": 10,
+      "steps": 1100,
+      "time": 22,
       "root": [
-        -0.021852651580911632,
-        -0.0129880484094652,
-        0.7277759397854502
+        -0.02427893678022773,
+        -0.015810939015567838,
+        0.7263922199060028
       ],
-      "force": 0,
-      "peakForce": 6.328215091251647,
-      "fault": null
+      "force": 9.322772823630357,
+      "peakForce": 9.845932493128586,
+      "fault": null,
+      "physicsTime": 22.000000000003904,
+      "referenceFrame": 99,
+      "boot": 0
     }
   ],
+  "standing": {
+    "steps": 3000,
+    "time": 60,
+    "root": [
+      -0.009882323702477143,
+      -0.010050721155855426,
+      0.7305969238282517
+    ],
+    "force": 0,
+    "peakForce": 0,
+    "fault": null,
+    "driftMm": [
+      8.236436074387566,
+      1.2734491500967895
+    ],
+    "physicsDt": 0.001,
+    "friction": [
+      1,
+      1,
+      1
+    ],
+    "cone": 1,
+    "impratio": 10,
+    "noslip": 20,
+    "cameraFollowsRoot": false
+  },
   "interaction": {
     "push10N": true,
-    "dragPeakForce": 16.852630590300453,
-    "releaseClearsForce": true
+    "dragPeakForce": 12.674401569134478,
+    "releaseClearsForce": true,
+    "robotDragWithoutModifier": true,
+    "blankDragRotatesCamera": true
   },
   "consoleErrors": [],
   "failedResponses": [],
-  "network_note": "Host browser uses existing HTTP proxy on loopback; all site resources were fetched from the public GitHub Pages origin.",
-  "application_source_commit": "b682333",
-  "verified_at": "2026-11-06T23:31:22+08:00"
+  "application_source_commit": "e170770e753153cd31a777a60fc4d5717e00cec8",
+  "verified_at": "2026-11-07T00:46:40+08:00",
+  "network_note": "Existing loopback HTTP proxy; all application resources fetched from the public GitHub Pages origin, no response replacement."
 }

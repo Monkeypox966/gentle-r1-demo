@@ -10,3 +10,5 @@
 - Verify raw observation/action parity, physical closed-loop behaviour and production subpath loading before publishing. Keep compact validation evidence, clean disposable files, update README and the training project's website guide.
 
 - UI is a plain full-height viewport + experiment panel. No hero, marketing banner, top navigation/footer or metric cards. Direct robot dragging applies force; blank-area dragging orbits. World camera fixed by default. Simulation has no clip-duration stop; 10-second references wrap with continuous lookahead, physics/filter/history/boot time never reset at the seam. Springs persist while enabled. Runtime config and model use hashed filenames to avoid stale contact-model caches.
+
+- Pages publishing uses `.github/scripts/deploy-pages.mjs`, official artifact/OIDC authorization, actions:read/pages:write/id-token:write, and a bounded 25-minute status monitor (30-minute job). Two deploy-pages@v4 attempts timed out during backend sync at its hard 10-minute maximum; source/model/browser tests passed. Keep failures visible, do not publish before browser acceptance or falsely report a pending deployment as live.
