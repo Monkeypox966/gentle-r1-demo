@@ -264,9 +264,303 @@
     "noslip": 20,
     "cameraFollowsRoot": false
   },
+  "dynamic": [
+    {
+      "id": "wave",
+      "push": false,
+      "active": "wave",
+      "steps": 1100,
+      "fault": null,
+      "peakForce": 0,
+      "root": [
+        -0.020551614084563682,
+        -0.016530711123176743,
+        0.7310688119189332
+      ],
+      "cycles": 2,
+      "cameraFollowsRoot": false,
+      "jointRmse": 0.05667387717421064,
+      "rootHeightRange": 0.0008863894327217903,
+      "rootNetTravel": 0.026374860221786114,
+      "feetHeightRange": [
+        0.001200770309204846,
+        0.00015324041799225085
+      ],
+      "kneeRange": [
+        0.036221426044306226,
+        0.02054387577191974
+      ],
+      "shoulderRange": [
+        0.5074090335115083,
+        0.5401334514982692
+      ],
+      "waistRange": 0.018311428939524775
+    },
+    {
+      "id": "wave",
+      "push": true,
+      "active": "wave",
+      "steps": 1100,
+      "fault": null,
+      "peakForce": 10,
+      "root": [
+        -0.021051773954632282,
+        -0.01645296864914425,
+        0.7310935760865762
+      ],
+      "cycles": 2,
+      "cameraFollowsRoot": false,
+      "jointRmse": 0.056890119135940255,
+      "rootHeightRange": 0.0015022477828134928,
+      "rootNetTravel": 0.026718483564878038,
+      "feetHeightRange": [
+        0.0018702848596355848,
+        0.0001445631907179279
+      ],
+      "kneeRange": [
+        0.038673677503844595,
+        0.02066751605202921
+      ],
+      "shoulderRange": [
+        0.5097302896403157,
+        0.5393839585279327
+      ],
+      "waistRange": 0.0206105093835985
+    },
+    {
+      "id": "twist",
+      "push": false,
+      "active": "twist",
+      "steps": 1100,
+      "fault": null,
+      "peakForce": 0,
+      "root": [
+        -0.02039657186714811,
+        -0.009809904714661316,
+        0.731939863136584
+      ],
+      "cycles": 2,
+      "cameraFollowsRoot": false,
+      "jointRmse": 0.052256662034416125,
+      "rootHeightRange": 0.0024493407599747163,
+      "rootNetTravel": 0.02263303723415114,
+      "feetHeightRange": [
+        0.0014248267111720558,
+        0.00020181459816676073
+      ],
+      "kneeRange": [
+        0.0430429267721647,
+        0.015743490851108155
+      ],
+      "shoulderRange": [
+        0.3785767752690358,
+        0.4056321559472569
+      ],
+      "waistRange": 0.4510959396276909
+    },
+    {
+      "id": "twist",
+      "push": true,
+      "active": "twist",
+      "steps": 1100,
+      "fault": null,
+      "peakForce": 10,
+      "root": [
+        -0.020504472975726454,
+        -0.010016505086294952,
+        0.7319159481712477
+      ],
+      "cycles": 2,
+      "cameraFollowsRoot": false,
+      "jointRmse": 0.05232851091559928,
+      "rootHeightRange": 0.0034242977883204295,
+      "rootNetTravel": 0.022820249476201374,
+      "feetHeightRange": [
+        0.0034215360246664384,
+        0.00010549712131613376
+      ],
+      "kneeRange": [
+        0.04338692926232235,
+        0.02432244060067429
+      ],
+      "shoulderRange": [
+        0.38091546634385637,
+        0.4053431440126788
+      ],
+      "waistRange": 0.45149516320938277
+    },
+    {
+      "id": "squat",
+      "push": false,
+      "active": "squat",
+      "steps": 1100,
+      "fault": null,
+      "peakForce": 0,
+      "root": [
+        -0.04426204872197908,
+        0.004697740909303708,
+        0.678237542088279
+      ],
+      "cycles": 2,
+      "cameraFollowsRoot": false,
+      "jointRmse": 0.05141593198737932,
+      "rootHeightRange": 0.05581781119716367,
+      "rootNetTravel": 0.04451064734103286,
+      "feetHeightRange": [
+        0.00022986906845834376,
+        0.00025995419499880157
+      ],
+      "kneeRange": [
+        0.5614547279212304,
+        0.5727208116009994
+      ],
+      "shoulderRange": [
+        0.3208665975734807,
+        0.35766483645382874
+      ],
+      "waistRange": 0.02278958188583614
+    },
+    {
+      "id": "squat",
+      "push": true,
+      "active": "squat",
+      "steps": 1100,
+      "fault": null,
+      "peakForce": 10,
+      "root": [
+        -0.04925723398315666,
+        0.016006472497464435,
+        0.6786779795721272
+      ],
+      "cycles": 2,
+      "cameraFollowsRoot": false,
+      "jointRmse": 0.052686073429276545,
+      "rootHeightRange": 0.05605287921763791,
+      "rootNetTravel": 0.051792685405214596,
+      "feetHeightRange": [
+        5.442460919169445e-05,
+        0.0005052507387384719
+      ],
+      "kneeRange": [
+        0.5643817171938645,
+        0.5674589437391573
+      ],
+      "shoulderRange": [
+        0.317532576053962,
+        0.3656391968624984
+      ],
+      "waistRange": 0.024608540740597422
+    },
+    {
+      "id": "walk",
+      "push": false,
+      "active": "walk",
+      "steps": 1100,
+      "fault": null,
+      "peakForce": 0,
+      "root": [
+        3.794152121796263,
+        -0.12585191523829287,
+        0.7215579978744774
+      ],
+      "cycles": 2,
+      "cameraFollowsRoot": true,
+      "jointRmse": 0.07087945383087017,
+      "rootHeightRange": 0.0053409277774896236,
+      "rootNetTravel": 3.7962388001679015,
+      "feetHeightRange": [
+        0.07708446850897244,
+        0.07494024425135787
+      ],
+      "kneeRange": [
+        0.6973831245967395,
+        0.6313706778804421
+      ],
+      "shoulderRange": [
+        0.18230960921966027,
+        0.25514516309472846
+      ],
+      "waistRange": 0.05911508023128229
+    },
+    {
+      "id": "walk",
+      "push": true,
+      "active": "walk",
+      "steps": 1100,
+      "fault": null,
+      "peakForce": 10,
+      "root": [
+        3.8201896251047565,
+        -0.1533286347279907,
+        0.7214716375277006
+      ],
+      "cycles": 2,
+      "cameraFollowsRoot": true,
+      "jointRmse": 0.07093540029925502,
+      "rootHeightRange": 0.006631485031076245,
+      "rootNetTravel": 3.823265416105135,
+      "feetHeightRange": [
+        0.07721514513076383,
+        0.07508843181788621
+      ],
+      "kneeRange": [
+        0.6981003832788245,
+        0.6345112731717208
+      ],
+      "shoulderRange": [
+        0.18312323057078306,
+        0.25502093938218606
+      ],
+      "waistRange": 0.060290387500912056
+    }
+  ],
+  "loadingHint": {
+    "afterResourcesReady": true,
+    "desktopAndMobileFits": true,
+    "dismissible": true,
+    "noAutomaticPlayback": true
+  },
   "motionSwitching": {
     "identityChecked": true,
     "physicalArmMotionChecked": true,
+    "conditionedMotionPoses": [
+      {
+        "active": "raise",
+        "force": 5,
+        "shoulders": [
+          -0.3959311199976173,
+          -0.41563412842563563
+        ],
+        "fault": null
+      },
+      {
+        "active": "reach",
+        "force": 5,
+        "shoulders": [
+          -0.5448224503862941,
+          -0.5817188147148904
+        ],
+        "fault": null
+      },
+      {
+        "active": "raise",
+        "force": 15,
+        "shoulders": [
+          -0.3944199537585718,
+          -0.43867176523033913
+        ],
+        "fault": null
+      },
+      {
+        "active": "reach",
+        "force": 15,
+        "shoulders": [
+          -0.547135665580521,
+          -0.6050511252528432
+        ],
+        "fault": null
+      }
+    ],
     "resumeWhilePlaying": true,
     "failedLoadRollback": {
       "active": "stand",
@@ -278,10 +572,26 @@
   },
   "interaction": {
     "push10N": true,
-    "dragPeakForce": 12.71405165203573,
+    "dragPeakForce": 12.674401569134767,
     "releaseClearsForce": true,
     "robotDragWithoutModifier": true,
-    "blankDragRotatesCamera": true
+    "blankDragRotatesCamera": true,
+    "walkingDrag": {
+      "body": 33,
+      "peakForce": 2.9856101836426556,
+      "recovery": {
+        "steps": 200,
+        "time": 4,
+        "root": [
+          0.6799559919671426,
+          0.07697139931621448,
+          0.7236841820642153
+        ],
+        "force": 0,
+        "peakForce": 0,
+        "fault": null
+      }
+    }
   },
   "consoleErrors": [],
   "failedResponses": []

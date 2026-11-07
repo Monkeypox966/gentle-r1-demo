@@ -16,13 +16,15 @@ sys.path.insert(0,'/home/mapinxuan/gentle-r1/deployment')
 from gentle_r1_deploy.schema import sha256
 from gentle_r1_deploy.motion import Motion
 from gentle_r1_deploy.observation import Observation,ActionFilter
+from dynamic_references import generate
 
 
 def main():
     mf=json.loads((SOURCE/'manifest.json').read_text())
     assert mf['checkpoint_sha256']=='61a5b331557f8e031de4f05fd71b48f58892e8d020578eaaeb1ea45f104af9c5'
     out=ROOT/'public/assets/r1';out.mkdir(parents=True,exist_ok=True)
-    for pattern in ['config-*.json','mujoco/r1-contact-*.xml','stand-*.json','raise-*.json','reach-*.json']:
+    motion_ids=['stand','raise','reach','wave','twist','squat','walk']
+    for pattern in ['config-*.json','mujoco/r1-contact-*.xml',*[f'{name}-*.json' for name in motion_ids]]:
         for old in out.glob(pattern): old.unlink()
     shutil.copy2(SOURCE/'policy.onnx',out/'policy.onnx')
     shutil.copytree(SOURCE/'mujoco',out/'mujoco',dirs_exist_ok=True)
@@ -74,6 +76,13 @@ def main():
         shutil.copy2(out/f'{name}.json',out/motion_file)
         config['motions'].append({'id':name,'label':label,'description':description,'file':motion_file,'duration':10.})
         motions[name]=motion
+    for name,payload in generate(config,out/'mujoco/r1.xml').items():
+        label=payload.pop('label');description=payload.pop('description')
+        (out/f'{name}.json').write_text(json.dumps(payload,separators=(',',':'))+'\n')
+        motion_file=f'{name}-{sha256(out/f"{name}.json")[:12]}.json'
+        shutil.copy2(out/f'{name}.json',out/motion_file)
+        config['motions'].append({'id':name,'label':label,'description':description,'file':motion_file,
+                                  'duration':10.,'locomotion':name=='walk'})
     config['files']={str(p.relative_to(out)):sha256(p) for p in sorted(out.rglob('*')) if p.is_file() and p.name!='config.json'}
     (out/'config.json').write_text(json.dumps(config,indent=2,ensure_ascii=False)+'\n')
     config_file=f'config-{sha256(out/"config.json")[:12]}.json'
@@ -95,10 +104,11 @@ def main():
     fixture=ROOT/'tests/fixtures';fixture.mkdir(parents=True,exist_ok=True)
     (fixture/'observations.json').write_text(json.dumps(oracle,separators=(',',':')))
     # Normalization parity needs raw, deterministic network outputs.
-    from gentle_r1_deploy.policy import Student
-    student=Student(SOURCE)
-    for case in oracle:case['expected_action']=student.action(case['observation']).tolist()
-    (fixture/'policy.json').write_text(json.dumps(oracle,separators=(',',':')))
+    if '--update-oracles' in sys.argv or not (fixture/'policy.json').exists():
+        from gentle_r1_deploy.policy import Student
+        student=Student(SOURCE)
+        for case in oracle:case['expected_action']=student.action(case['observation']).tolist()
+        (fixture/'policy.json').write_text(json.dumps(oracle,separators=(',',':')))
     filter_config={k:np.array(v) if isinstance(v,list) else v for k,v in config.items()}
     port=ActionFilter(filter_config);filter_cases=[]
     for _ in range(6):
@@ -110,7 +120,7 @@ def main():
         'source_training_project':'gentle-r1','raw_training_data_included':False,'assets':config['files'],
         'browser_model_changes':{'source_model_sha256':source_model_sha,'option':contact_settings,
           'friction_unchanged':1.0,'reason':'Contact-accuracy audit; policy 50Hz and target filter 200Hz unchanged; no foot pinning.'}},indent=2)+'\n')
-    print('Exported frozen R1 model and three original reference motions')
+    print('Exported frozen R1 model and seven original reference motions')
 
 
 if __name__=='__main__':main()

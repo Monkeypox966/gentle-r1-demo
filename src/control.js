@@ -16,6 +16,15 @@ export function inverseYaw(a, v) { return [Math.cos(a)*v[0]+Math.sin(a)*v[1],-Ma
 export function assertFinite(a, length, label) {
   if (a.length !== length || !Array.from(a).every(Number.isFinite)) throw Error(`${label} 维度或数值异常`);
 }
+// A translating gait loops in its own moving frame. Carry its displacement
+// through future samples instead of asking the policy to jump back to x=0.
+export function referenceSample(motion,frame) {
+  const period=motion.joint_pos.length-1;
+  const index=motion.loop?frame%period:Math.min(frame,period);
+  const cycle=motion.loop?Math.floor(frame/period):0;
+  const delta=motion.loop_translation||[0,0,0];
+  return {index,pos:motion.root_pos[index].map((x,i)=>x+cycle*delta[i]),quat:motion.root_quat[index]};
+}
 export class Observation {
   constructor(config, physicalQ) {
     this.config=config;
@@ -29,8 +38,8 @@ export class Observation {
   }
   compute(motion, frame, quat, gyro, actions, step, force) {
     if (!Number.isFinite(force) || force<5 || force>15) throw Error('力条件超出训练范围');
-    const ids=FUTURE.map(k=>motion.loop?(frame+k)%(motion.joint_pos.length-1):Math.min(frame+k,motion.joint_pos.length-1));
-    const pos=ids.map(i=>motion.root_pos[i]), qs=ids.map(i=>motion.root_quat[i]);
+    const samples=FUTURE.map(k=>referenceSample(motion,frame+k));
+    const ids=samples.map(s=>s.index),pos=samples.map(s=>s.pos),qs=samples.map(s=>s.quat);
     const angle=yaw(qs[0]), packed=[Math.max(25-step,0)/25,...pos.map(p=>p[2])];
     for(let i=1;i<5;i++) packed.push(...inverseYaw(angle,pos[i].map((x,j)=>x-pos[0][j])));
     for(let i=1;i<5;i++) {const a=yaw(qs[i])-angle;packed.push(Math.cos(a),Math.sin(a));}

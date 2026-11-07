@@ -15,6 +15,15 @@ try {
   const loaded=await page.evaluate(()=>({loaded:window.__R1_DEBUG__?.app.loaded,status:document.querySelector('#status-text').textContent,detail:document.querySelector('#loading-text').textContent}));
   assert.ok(loaded.loaded,JSON.stringify(loaded));
   console.log('READY',loaded);
+  assert.ok(await page.locator('#interaction-help').isVisible(),'The interaction hint must appear once resources are ready');
+  assert.ok((await page.locator('#interaction-help').innerText()).includes('可以用鼠标拖动机器人来施力，从而展现柔顺性'));
+  assert.equal(await page.evaluate(()=>window.__R1_DEBUG__.app.playing),false);
+  await page.screenshot({path:'test-results/interaction-help.png',fullPage:true});
+  await page.setViewportSize({width:390,height:844});
+  assert.ok(await page.evaluate(()=>{const r=document.querySelector('#interaction-help').getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight;}));
+  await page.locator('#close-interaction-help').click();assert.equal(await page.locator('#interaction-help').isVisible(),false);
+  await page.setViewportSize({width:1440,height:1050});
+  assert.equal(await page.locator('#motion option').count(),7);
   await page.waitForTimeout(500);
   await page.screenshot({path:'test-results/desktop.png',fullPage:true});
   const fixtures=JSON.parse(fs.readFileSync('tests/fixtures/policy.json'));
@@ -97,8 +106,77 @@ try {
   assert.equal(standing.friction.length,3);assert.ok(standing.friction.every(mu=>mu===1));
   assert.ok(standing.driftMm[0]<20&&standing.driftMm[1]<15,JSON.stringify(standing));assert.equal(standing.cameraFollowsRoot,false);
   console.log('STANDING_60S',standing);
+  const dynamic=[];
+  for(const id of ['wave','twist','squat','walk'])for(const push of [false,true]){
+    await page.selectOption('#motion',id);await page.waitForFunction(()=>!window.__R1_DEBUG__.app.busy);
+    const result=await page.evaluate(async({id,push})=>{
+      const d=window.__R1_DEBUG__,s=d.app.sim;s.reset();
+      if(s.motionId!==id)throw Error('Dynamic motion did not activate');
+      const feet=['left','right'].map(side=>s.bodyId(side+'_ankle_roll_link'));
+      const trace=[];let peakForce=0;
+      for(let i=0;i<44;i++){
+        if(push&&i===8)s.push();
+        const r=await d.runSteps(25);peakForce=Math.max(peakForce,r.peakForce);
+        if(s.time>=2)trace.push({t:s.time,root:s.root,feet:feet.map(b=>Array.from(s.data.xpos.slice(b*3,b*3+3))),q:Array.from(s.physicalQ()),
+          ref:s.motions.get(id).joint_pos[s.frame],referenceRoot:Array.from(s.referenceData.qpos.slice(0,3))});
+      }
+      const range=values=>Math.max(...values)-Math.min(...values);
+      const names=s.config.physical_joint_names;
+      const qRange=name=>range(trace.map(f=>f.q[names.indexOf(name)]));
+      return {id,push,active:s.motionId,steps:s.steps,fault:s.fault,peakForce,root:s.root,cycles:s.cycles,
+        cameraFollowsRoot:d.app.viewer.follow,
+        jointRmse:Math.sqrt(trace.reduce((total,f)=>total+f.q.slice(0,24).reduce((sum,q,i)=>sum+(q-f.ref[i])**2,0),0)/(trace.length*24)),
+        rootHeightRange:range(trace.map(f=>f.root[2])),rootNetTravel:Math.hypot(...s.root.slice(0,2)),
+        feetHeightRange:feet.map((_,i)=>range(trace.map(f=>f.feet[i][2]))),
+        kneeRange:['left','right'].map(side=>qRange(side+'_knee_joint')),
+        shoulderRange:['left','right'].map(side=>qRange(side+'_shoulder_pitch_joint')),
+        waistRange:qRange('waist_yaw_joint'),trace};
+    },{id,push});
+    assert.equal(result.active,id);assert.equal(result.steps,1100);assert.equal(result.cycles,2);assert.equal(result.fault,null);
+    assert.ok(result.jointRmse<.18,JSON.stringify({...result,trace:undefined}));
+    assert.equal(result.peakForce,push?10:0);
+    if(id==='walk'){
+      assert.equal(result.cameraFollowsRoot,true);
+      assert.ok(result.rootNetTravel>1.5,'Walking must physically advance, not stand or shuffle in place');
+      assert.ok(result.feetHeightRange.every(h=>h>.025),'Both physical feet must lift');
+      // Reference is at x=3.96m after two seams, rather than teleporting to 0.
+      assert.ok(result.trace.at(-1).referenceRoot[0]>3.9);
+    }else assert.equal(result.cameraFollowsRoot,false);
+    if(id==='squat')assert.ok(result.rootHeightRange>.035&&result.kneeRange.every(x=>x>.15));
+    if(id==='wave')assert.ok(result.shoulderRange.every(x=>x>.25));
+    if(id==='twist')assert.ok(result.waistRange>.35);
+    console.log('DYNAMIC',{...result,trace:undefined});dynamic.push(result);
+    if(!push){
+      await page.click('#home-camera');await page.waitForTimeout(100);
+      await page.screenshot({path:`test-results/dynamic-${id}.png`,fullPage:true});
+    }
+  }
+  // Real pointer input while the physical robot is walking, followed by
+  // continued tracking after release (not just a static drag attachment).
+  await page.evaluate(async()=>{const d=window.__R1_DEBUG__;d.app.sim.reset();await d.runSteps(100);d.app.viewer.home();});
+  await page.waitForTimeout(200);
+  const walkingHit=await page.evaluate(()=>{
+    const v=window.__R1_DEBUG__.app.viewer,c=v.renderer.domElement.getBoundingClientRect();
+    for(const mesh of v.meshes.filter(m=>v.sim.wrists.includes(m.userData.body))){
+      const p=mesh.position.clone().project(v.camera),x=c.left+(p.x+1)*c.width/2,y=c.top+(1-p.y)*c.height/2;
+      const hit=v.pick({clientX:x,clientY:y});if(hit&&v.sim.wrists.includes(hit.object.userData.body))return {x,y,body:hit.object.userData.body};
+    }
+    for(let y=c.top+c.height*.35;y<c.bottom;y+=5)for(let x=c.left+c.width*.35;x<c.left+c.width*.7;x+=5){
+      const hit=v.pick({clientX:x,clientY:y});if(hit&&hit.object.userData.body===v.sim.torso)return {x,y,body:hit.object.userData.body};
+    }
+    return null;
+  });
+  assert.ok(walkingHit,'The moving robot must remain visible and pickable');
+  await page.mouse.move(walkingHit.x,walkingHit.y);await page.mouse.down();
+  await page.mouse.move(walkingHit.x+8,walkingHit.y,{steps:3});
+  const walkingDrag=await page.evaluate(()=>window.__R1_DEBUG__.runSteps(10));
+  assert.ok(walkingDrag.peakForce>0&&walkingDrag.peakForce<=30.000001);assert.equal(walkingDrag.fault,null);
+  await page.mouse.up();
+  const walkingRecovery=await page.evaluate(()=>window.__R1_DEBUG__.runSteps(90));
+  assert.equal(walkingRecovery.fault,null);assert.equal(walkingRecovery.force,0);assert.ok(walkingRecovery.root[0]>.3);
+  await page.selectOption('#motion','stand');await page.waitForFunction(()=>!window.__R1_DEBUG__.app.busy);
   // Normal UI operates the same engine; no test-only motion path.
-  await page.click('#play');await page.waitForFunction(()=>window.__R1_DEBUG__.app.sim.steps>3005);
+  await page.click('#play');await page.waitForFunction(()=>window.__R1_DEBUG__.app.sim.steps>5);
   assert.equal(await page.evaluate(()=>window.__R1_DEBUG__.app.playing),true);await page.click('#play');
   await page.click('#play');await page.selectOption('#motion','raise');
   await page.waitForFunction(()=>!window.__R1_DEBUG__.app.busy);
@@ -151,6 +229,7 @@ try {
   faultPage.on('pageerror',error=>faultErrors.push(error.message));
   await faultPage.goto(base,{waitUntil:'networkidle',timeout:120000});
   await faultPage.waitForFunction(()=>window.__R1_DEBUG__?.app.loaded,null,{timeout:120000});
+  assert.ok(await faultPage.locator('#interaction-help').isVisible());await faultPage.click('#close-interaction-help');
   const raiseFile=await faultPage.evaluate(()=>window.__R1_DEBUG__.app.sim.config.motions.find(m=>m.id==='raise').file);
   const pattern='**/'+raiseFile;
   await faultPage.route(pattern,route=>route.abort('failed'));
@@ -170,8 +249,10 @@ try {
   assert.ok((await faultPage.locator('#motion-description').innerText()).includes('双臂前伸'));
   assert.deepEqual(faultErrors,[]);await faultPage.close();
   assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
-  fs.writeFileSync('test-results/browser.json',JSON.stringify({status:'passed',url:base,maxAbsoluteActionError:maxError,cases,standing,
+  fs.writeFileSync('test-results/browser.json',JSON.stringify({status:'passed',url:base,maxAbsoluteActionError:maxError,cases,standing,dynamic,
+    loadingHint:{afterResourcesReady:true,desktopAndMobileFits:true,dismissible:true,noAutomaticPlayback:true},
     motionSwitching:{identityChecked:true,physicalArmMotionChecked:true,conditionedMotionPoses,resumeWhilePlaying:true,failedLoadRollback:rollback,latestSelectionWins:true},
-    interaction:{push10N:true,dragPeakForce:dragResult.peakForce,releaseClearsForce:true,robotDragWithoutModifier:true,blankDragRotatesCamera:true},consoleErrors:errors,failedResponses:requests},null,2));
+    interaction:{push10N:true,dragPeakForce:dragResult.peakForce,releaseClearsForce:true,robotDragWithoutModifier:true,blankDragRotatesCamera:true,
+      walkingDrag:{body:walkingHit.body,peakForce:walkingDrag.peakForce,recovery:walkingRecovery}},consoleErrors:errors,failedResponses:requests},null,2));
   console.log('BROWSER_ACCEPTANCE_PASSED');
 } catch(error){await page.screenshot({path:'test-results/failure.png',fullPage:true}).catch(()=>{});fs.writeFileSync('test-results/failure.json',JSON.stringify({error:error.stack,pageErrors:errors,failedResponses:requests},null,2));throw error;}finally{await browser.close();}

@@ -1,0 +1,255 @@
+{
+  "gait": null,
+  "results": [
+    {
+      "id": "wave",
+      "force": 5.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.04970739164515277,
+      "final_root": [
+        -0.01650977188700913,
+        -0.013950572978469147,
+        0.7306385013723882
+      ],
+      "root_height_range": 0.003530334894243481,
+      "root_xy_travel": 0.23415434633225085,
+      "foot_height_range": [
+        0.005727237901753224,
+        0.0010014769389111167
+      ]
+    },
+    {
+      "id": "twist",
+      "force": 5.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.045031520278792196,
+      "final_root": [
+        -0.014183366977525225,
+        -0.010430397162586237,
+        0.7315429480508203
+      ],
+      "root_height_range": 0.004743045916950406,
+      "root_xy_travel": 0.20957589831302537,
+      "foot_height_range": [
+        0.006862524979117657,
+        0.0004826764053396104
+      ]
+    },
+    {
+      "id": "squat",
+      "force": 5.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.05487261379938989,
+      "final_root": [
+        -0.04921314628978341,
+        0.023251179211183647,
+        0.6778961907710453
+      ],
+      "root_height_range": 0.05659533562520047,
+      "root_xy_travel": 0.31684814384344007,
+      "foot_height_range": [
+        9.614828996373781e-05,
+        0.002404161987524245
+      ]
+    },
+    {
+      "id": "walk",
+      "force": 5.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.07273116843424172,
+      "final_root": [
+        5.3059299617737326,
+        1.2026165941808378,
+        0.7202359260599387
+      ],
+      "root_height_range": 0.008879621137224958,
+      "root_xy_travel": 6.462319073433125,
+      "foot_height_range": [
+        0.0775541561788862,
+        0.08544444570037513
+      ]
+    },
+    {
+      "id": "wave",
+      "force": 10.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.05713856370666854,
+      "final_root": [
+        -0.020527555094359315,
+        -0.016340560822700544,
+        0.7311476290607377
+      ],
+      "root_height_range": 0.003414449818990639,
+      "root_xy_travel": 0.2695138288426821,
+      "foot_height_range": [
+        0.006180528334473578,
+        0.0010399004643951715
+      ]
+    },
+    {
+      "id": "twist",
+      "force": 10.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.05134335253292189,
+      "final_root": [
+        -0.01913294819986164,
+        -0.011466525641228962,
+        0.7319504318535057
+      ],
+      "root_height_range": 0.004255763245804345,
+      "root_xy_travel": 0.21730800481308973,
+      "foot_height_range": [
+        0.006301738401963797,
+        0.0004722567150285961
+      ]
+    },
+    {
+      "id": "squat",
+      "force": 10.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.055854349733896226,
+      "final_root": [
+        -0.05120302229060777,
+        0.02609773788444667,
+        0.6778822204545752
+      ],
+      "root_height_range": 0.057395742139678796,
+      "root_xy_travel": 0.3548045118739941,
+      "foot_height_range": [
+        8.374372984043532e-05,
+        0.0026725533800468493
+      ]
+    },
+    {
+      "id": "walk",
+      "force": 10.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.07681694154153684,
+      "final_root": [
+        5.508962375117793,
+        -0.25874725374896457,
+        0.7216336794732481
+      ],
+      "root_height_range": 0.0074803201877253755,
+      "root_xy_travel": 6.592139986286174,
+      "foot_height_range": [
+        0.08005864290976253,
+        0.08662023081519798
+      ]
+    },
+    {
+      "id": "wave",
+      "force": 15.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.07039243866099713,
+      "final_root": [
+        -0.020263084043057458,
+        -0.02180560231051995,
+        0.7310958509724209
+      ],
+      "root_height_range": 0.002862077419976128,
+      "root_xy_travel": 0.3048966131658061,
+      "foot_height_range": [
+        0.00496029398760145,
+        0.0006689148373398845
+      ]
+    },
+    {
+      "id": "twist",
+      "force": 15.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.06475943013172047,
+      "final_root": [
+        -0.018356442638274094,
+        -0.014094528331556697,
+        0.7318796014741052
+      ],
+      "root_height_range": 0.0033103991959380075,
+      "root_xy_travel": 0.21219222609836505,
+      "foot_height_range": [
+        0.0035947117986347976,
+        0.0004555323729805161
+      ]
+    },
+    {
+      "id": "squat",
+      "force": 15.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.06449024745612135,
+      "final_root": [
+        -0.052131466059092094,
+        0.026059353215090963,
+        0.6776972991804531
+      ],
+      "root_height_range": 0.05786708834544407,
+      "root_xy_travel": 0.36803959098574157,
+      "foot_height_range": [
+        7.388609946362701e-05,
+        0.002373720641353161
+      ]
+    },
+    {
+      "id": "walk",
+      "force": 15.0,
+      "push": true,
+      "seconds": 32.0,
+      "completed": 32.0,
+      "fault": null,
+      "joint_rmse_rad": 0.08513970298784068,
+      "final_root": [
+        5.222907363405944,
+        -1.5325805842093714,
+        0.7223140347726373
+      ],
+      "root_height_range": 0.007865542364380196,
+      "root_xy_travel": 6.688769102955275,
+      "foot_height_range": [
+        0.08080439934527997,
+        0.0863258689212309
+      ]
+    }
+  ],
+  "checkpoint_sha256": "61a5b331557f8e031de4f05fd71b48f58892e8d020578eaaeb1ea45f104af9c5",
+  "onnx_sha256": "726ca9fd62520498125186e19a5fbc1d9e8d6607245852ca91cb167592d6df21",
+  "browser_model_sha256": "63b02c43e430ad5055b523abb19726d5630d3a0c6107beb814d5e5d156540f15",
+  "references": {
+    "wave": "wave-1341bfb3de9f.json",
+    "twist": "twist-c07e698b7aa9.json",
+    "squat": "squat-b2253364abf9.json",
+    "walk": "walk-5c35e52b2f15.json"
+  },
+  "note": "Frozen exported references; lateral 10N push at 4..4.25s; CPU-only MuJoCo; no dataset input."
+}

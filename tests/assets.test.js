@@ -18,16 +18,27 @@ test('all frozen policy, model and reference assets match the provenance manifes
   }
 });
 
-test('each selectable reference has continuous loop endpoints and a distinct arm trajectory',()=>{
+test('all seven references have valid cyclic state and authored dynamic movement',()=>{
   const root=new URL('../public/assets/r1/',import.meta.url);
   const c=JSON.parse(fs.readFileSync(new URL('config.json',root)));
   const middles=[];
+  assert.deepEqual(c.motions.map(m=>m.id),['stand','raise','reach','wave','twist','squat','walk']);
   for(const entry of c.motions){
     const m=JSON.parse(fs.readFileSync(new URL(entry.file,root)));
     assert.equal(m.name,entry.id);
     for(const key of ['joint_pos','root_pos','root_quat','joint_vel','root_lin_vel','root_ang_vel']){
       assert.equal(m[key].length,501);
-      assert.ok(m[key][0].every((x,i)=>Math.abs(x-m[key].at(-1)[i])<1e-8),`${entry.id}: ${key} seam must be continuous`);
+      assert.ok(m[key][0].every((x,i)=>Math.abs(x+(key==='root_pos'?(m.loop_translation?.[i]||0):0)-m[key].at(-1)[i])<1e-8),`${entry.id}: ${key} seam must be continuous`);
+      assert.ok(m[key].every(row=>row.every(Number.isFinite)),`${entry.id}: finite ${key}`);
+    }
+    assert.ok(m.joint_pos.every(row=>row.every((q,i)=>q>=c.lower[i]&&q<=c.upper[i])));
+    assert.ok(m.joint_pos.every(row=>row[24]===0&&row[25]===0));
+    if(entry.id==='walk'){
+      assert.equal(entry.locomotion,true);assert.ok(m.loop_translation[0]>1);
+      for(const side of ['left','right']){
+        const i=c.physical_joint_names.indexOf(side+'_knee_joint');
+        const values=m.joint_pos.map(row=>row[i]);assert.ok(Math.max(...values)-Math.min(...values)>.3);
+      }
     }
     middles.push(m.joint_pos[250]);
   }

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {Observation,ActionFilter,guardTarget} from '../src/control.js';
+import {Observation,ActionFilter,guardTarget,referenceSample} from '../src/control.js';
 const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url)));
 const config=read('../public/assets/r1/config.json'),motion=read('../public/assets/r1/raise.json');
 function close(actual,expected,tolerance=2e-6){assert.equal(actual.length,expected.length);const diff=Math.max(...Array.from(actual,(x,i)=>Math.abs(x-expected[i])));assert.ok(diff<=tolerance,`max numerical error ${diff}`);}
@@ -46,4 +46,18 @@ test('loop lookahead wraps across the seam instead of clamping or restarting his
   for(const [i,frame] of [4,1,3,2,0].entries())assert.ok(Math.abs(obs[23+i*24]-ref.joint_pos[frame][0])<1e-7);
   assert.equal(obs[0],0);
   assert.ok(Math.abs(observer.history[0][0]-observer.history[1][0]-.01)<1e-12);
+});
+test('walking future samples carry root displacement across every seam',()=>{
+  const ref=read('../public/assets/r1/walk.json');ref.loop=true;
+  const period=ref.joint_pos.length-1,delta=ref.loop_translation;
+  for(const cycle of [0,1,20]){
+    const sample=referenceSample(ref,(cycle+1)*period);
+    close(sample.pos,ref.root_pos[0].map((x,i)=>x+(cycle+1)*delta[i]),1e-12);
+    const before=referenceSample(ref,(cycle+1)*period-1),after=referenceSample(ref,(cycle+1)*period+1);
+    assert.ok(Math.abs(after.pos[0]-before.pos[0]-.18*.04)<1e-10);
+  }
+  const obs=new Observation(config,config.default).compute(ref,499,[1,0,0,0],[0,0,0],Array.from({length:3},()=>new Float64Array(24)),999,10);
+  // Root XY lookahead starts at packed index 6, with horizons 2,4,8,16.
+  for(const [k,horizon] of [2,4,8,16].entries())assert.ok(Math.abs(obs[6+k*2]-.18*.02*horizon)<1e-7);
+  assert.ok(Math.max(...obs.slice(6,14).map(Math.abs))<.1,'No 1.8m backward jump at a gait seam');
 });

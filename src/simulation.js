@@ -3,7 +3,7 @@ import mujocoWasm from '@mujoco/mujoco/mujoco.wasm?url';
 import * as ort from 'onnxruntime-web/wasm';
 import ortWasm from '../node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm?url';
 import {CONFIG_FILE} from './bundle.js';
-import {Observation,ActionFilter,guardTarget,checkState,normalizeQuat,inverseApply,clamp,cross,norm} from './control.js';
+import {Observation,ActionFilter,guardTarget,checkState,normalizeQuat,inverseApply,clamp,cross,norm,referenceSample,assertFinite} from './control.js';
 
 ort.env.wasm.numThreads=1;
 ort.env.wasm.proxy=false;
@@ -59,12 +59,15 @@ export class Simulation {
     if(!this.motions.has(id)) {
       const entry=this.config.motions.find(m=>m.id===id);if(!entry)throw Error('未知参考动作');
       const motion=await json(BASE+entry.file);
-      if(motion.fps!==50 || motion.joint_pos.some(q=>q.length!==26 || q.some(x=>!Number.isFinite(x))))throw Error('动作格式无效');
+      if(motion.name!==id||motion.fps!==50||motion.joint_pos.length<2)throw Error('动作格式无效');
+      const delta=motion.loop_translation||[0,0,0];assertFinite(delta,3,'循环位移');
       // Exported references have matching position/velocity endpoints. Wrap
       // reference indices only: never reset the physical state at a boundary.
-      for(const key of ['joint_pos','root_pos','root_quat','joint_vel','root_lin_vel','root_ang_vel']){
+      for(const [key,width] of [['joint_pos',26],['root_pos',3],['root_quat',4],['joint_vel',26],['root_lin_vel',3],['root_ang_vel',3]]){
+        if(motion[key]?.length!==motion.joint_pos.length)throw Error('动作帧数不匹配');
+        for(const row of motion[key])assertFinite(row,width,key);
         const first=motion[key][0],last=motion[key].at(-1);
-        if(first.some((x,i)=>Math.abs(x-last[i])>1e-8))throw Error('参考动作端点不连续');
+        if(first.some((x,i)=>Math.abs(x+(key==='root_pos'?delta[i]:0)-last[i])>1e-8))throw Error('参考动作端点不连续');
       }
       motion.loop=true;
       this.motions.set(id,motion);
@@ -86,7 +89,7 @@ export class Simulation {
     this.data.qvel.set(m.root_lin_vel[0],0);this.data.qvel.set(inverseApply(normalizeQuat(m.root_quat[0]),m.root_ang_vel[0]),3);
     this.mj.mj_forward(this.model,this.data);
     this.observer=new Observation(c,this.physicalQ());this.filter=new ActionFilter(c);
-    this.lastTwo=[this.physicalQ(),this.physicalQ()];this.frame=this.steps=0;this.fault=null;
+    this.lastTwo=[this.physicalQ(),this.physicalQ()];this.frame=this.cycles=this.steps=0;this.fault=null;
     this.lastObservation=new Float32Array(392);this.lastAction=new Float32Array(24);this.lastForce=0;
     this.drag=null;this.pushUntil=0;this.forceVectors=[];
     this.springAnchors=this.wrists.map(b=>Array.from(this.data.xpos.slice(b*3,b*3+3),(x,i)=>x+(i===0?.1:0)));
@@ -105,6 +108,7 @@ export class Simulation {
       if(this.steps===0)this.lastObservation=new Float32Array(392);
       else {
         this.observer.advance(this.lastTwo);this.frame=(this.frame+1)%(m.joint_pos.length-1);
+        if(this.frame===0)this.cycles++;
         this.lastObservation=this.observer.compute(m,this.frame,quat,Array.from(this.data.qvel.slice(3,6)),this.filter.history,this.steps,this.forceLimit);
       }
       const started=performance.now(),action=await this.infer(this.lastObservation);
@@ -164,8 +168,9 @@ export class Simulation {
     this.lastForce=peak;
   }
   updateReference(){
-    const m=this.motions.get(this.motionId),i=Math.min(this.frame,m.joint_pos.length-1),d=this.referenceData;
-    d.qpos.set(m.root_pos[i],0);d.qpos.set(normalizeQuat(m.root_quat[i]),3);
+    const m=this.motions.get(this.motionId),d=this.referenceData;
+    const sample=referenceSample(m,this.frame+this.cycles*(m.joint_pos.length-1)),i=sample.index;
+    d.qpos.set(sample.pos,0);d.qpos.set(normalizeQuat(sample.quat),3);
     for(let j=0;j<26;j++)d.qpos[this.qids[j]]=m.joint_pos[i][j];
     this.mj.mj_forward(this.model,d);
   }

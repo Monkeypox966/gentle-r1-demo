@@ -48,14 +48,17 @@ async function main(){
   try{
     app.sim=new Simulation((value,text)=>{$('loading-progress').style.width=(value*100)+'%';$('loading-text').textContent=text;});
     await app.sim.init();app.viewer=new Viewer($('viewport'),app.sim);app.loaded=true;
+    $('motion').replaceChildren(...app.sim.config.motions.map(entry=>new Option(entry.label,entry.id)));
+    motionDescription();
     $('controls').disabled=false;$('loading').classList.add('hidden');status('已就绪');
+    $('interaction-help').showModal();
     resolveReady(true);pump();setInterval(update,100);
   }catch(error){status('加载失败','error');$('loading-text').textContent=error.message;message('页面加载失败，可刷新重试。'+error.message,true);rejectReady(error);console.error(error);}
 }
 $('play').addEventListener('click',()=>app.playing?pause():play());$('reset').addEventListener('click',reset);
 function motionDescription(){
   const entry=app.sim.config.motions.find(m=>m.id===app.sim.motionId);
-  $('motion-description').textContent=entry.label+' · '+(entry.id==='stand'?'固定站立参考；仿真持续运行。':'周期参考；循环边界不重置物理状态。');
+  $('motion-description').textContent=entry.label+' · '+entry.description;
 }
 $('motion').addEventListener('change',async event=>{
   const id=event.currentTarget.value,request=++app.motionRequest;
@@ -64,7 +67,8 @@ $('motion').addEventListener('change',async event=>{
   try{
     const committed=await app.sim.selectMotion(id);
     if(request!==app.motionRequest||!committed)return;
-    app.forceHistory.fill(0);app.viewer.home();motionDescription();$('motion').value=app.sim.motionId;
+    app.forceHistory.fill(0);app.viewer.follow=!!app.sim.config.motions.find(m=>m.id===id).locomotion;
+    app.viewer.home();motionDescription();$('motion').value=app.sim.motionId;
     $('play-label').textContent='运行策略';status('已就绪');message('');
     app.busy=false;if(app.resumeAfterMotion)play();update();
   }catch(error){
@@ -84,7 +88,8 @@ $('fullscreen-button').addEventListener('click',()=>{if(document.fullscreenEleme
 document.querySelectorAll('[data-speed]').forEach(button=>button.addEventListener('click',()=>{app.speed=Number(button.dataset.speed);document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b===button));}));
 $('about-button').addEventListener('click',()=>$('about').showModal());
 $('close-about').addEventListener('click',()=>$('about').close());$('about').addEventListener('click',event=>{if(event.target===$('about')){const r=$('about').getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)$('about').close();}});
-document.addEventListener('keydown',event=>{if(/INPUT|SELECT|BUTTON|TEXTAREA/.test(document.activeElement.tagName)||$('about').open)return;if(event.code==='Space'){event.preventDefault();app.playing?pause():play();}if(event.code==='KeyR'&&app.loaded)reset();});
+$('close-interaction-help').addEventListener('click',()=>{$('interaction-help').close();$('play').focus();});
+document.addEventListener('keydown',event=>{if(/INPUT|SELECT|BUTTON|TEXTAREA/.test(document.activeElement.tagName)||document.querySelector('dialog[open]'))return;if(event.code==='Space'){event.preventDefault();app.playing?pause():play();}if(event.code==='KeyR'&&app.loaded)reset();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&app.playing){pause();message('标签页已隐藏，仿真自动暂停。');}});
 window.addEventListener('pagehide',()=>{pause();app.viewer?.dispose();app.sim?.dispose();});
 // Deterministic acceptance interface also supports reproducible scientific checks.

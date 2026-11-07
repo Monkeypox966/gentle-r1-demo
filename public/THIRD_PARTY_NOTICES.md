@@ -12,6 +12,6 @@ The original browser application and synthetic reference motions are provided un
 | [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) 1.26.0 | Microsoft Corporation | [MIT](licenses/ort.txt), [third-party notices](licenses/ort-third-party.txt) |
 | [Unitree ROS R1 description](https://github.com/unitreerobotics/unitree_ros) | Copyright (c) 2016–2022 HangZhou YuShu TECHNOLOGY CO., LTD. (Unitree Robotics). R1 meshes; derived MJCF has floating base, position servos and explicit browser contact refinement (1 ms integration, elliptic cone, impratio 10, NoSlip20; unchanged friction 1.0) | [BSD-3-Clause](licenses/unitree.txt) |
 
-The original synthetic stand/raise/reach reference JSON files contain no excerpts from LAFAN, AMASS, InterX or the original viewer's recorded motions. Training dataset licenses are not extended by this repository. Names and trademarks identify research and model sources; no endorsement is implied.
+The original synthetic stand/raise/reach/wave/twist/squat/walk reference JSON files contain no excerpts from LAFAN, AMASS, InterX or the original viewer's recorded motions. Squat and walk use authored foot paths and R1 inverse kinematics; no captured motion is an input to their generator. Training dataset licenses are not extended by this repository. Names and trademarks identify research and model sources; no endorsement is implied.
 
 Source/asset hashes are recorded in `ASSET_PROVENANCE.json` in the source repository. Dependency versions and package integrity values are pinned in `package-lock.json`.

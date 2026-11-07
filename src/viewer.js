@@ -19,7 +19,7 @@ export class Viewer {
     this.controls.maxPolarAngle=Math.PI*.49;this.home();
     this.scene.add(new THREE.HemisphereLight(0xf6f8ff,0xc6b9a8,1.5));
     const key=new THREE.DirectionalLight(0xfff4e6,2);key.position.set(2,-3,5);key.castShadow=true;
-    key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.normalBias=.015;this.scene.add(key);
+    key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=2;key.shadow.camera.bottom=-2;key.shadow.normalBias=.015;this.scene.add(key,key.target);this.key=key;
     const rim=new THREE.DirectionalLight(0xb3d6d1,1);rim.position.set(-3,1,3);this.scene.add(rim);
     const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshStandardMaterial({color:0xa5adb5,roughness:.96}));
     ground.position.z=-.002;ground.receiveShadow=true;this.scene.add(ground);
@@ -65,7 +65,7 @@ export class Viewer {
       mesh.quaternion.setFromRotationMatrix(matrix);
     }
   }
-  home(){const [x,y,z]=this.sim.root;this.camera.position.set(x+2.2,y-2.25,z+.68);this.controls.target.set(x,y,z-.09);this.controls.update();}
+  home(){const [x,y,z]=this.sim.root;this.camera.position.set(x+2.2,y-2.25,z+.68);this.controls.target.set(x,y,z-.09);this.previousRoot?.set(x,y,z);this.controls.update();}
   resize(){const {width,height}=this.container.getBoundingClientRect();this.renderer.setSize(width,height);this.camera.aspect=width/Math.max(height,1);this.camera.updateProjectionMatrix();}
   pick(event){const rect=this.renderer.domElement.getBoundingClientRect();this.pointer.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);this.raycaster.setFromCamera(this.pointer,this.camera);return this.raycaster.intersectObjects(this.meshes,false)[0];}
   bindDrag(){
@@ -99,6 +99,9 @@ export class Viewer {
     if(this.disposed)return;this.raf=requestAnimationFrame(this.animate);
     this.updateMeshes(this.meshes,this.sim.data);this.updateMeshes(this.ghosts,this.sim.referenceData,this.ghostVisible);
     const root=new THREE.Vector3(...this.sim.root);
+    // Keep a walking robot inside the shadow map. Only the light moves; the
+    // ground/grid and all physical poses stay in world coordinates.
+    this.key.position.set(root.x+2,root.y-3,5);this.key.target.position.set(root.x,root.y,0);
     if(this.follow){const d=root.clone().sub(this.previousRoot);this.camera.position.add(d);this.controls.target.add(d);}
     this.previousRoot.copy(root);
     this.forceArrows.forEach((a,i)=>{const f=this.sim.forceVectors[i];a.visible=!!f&&Math.hypot(...f.force)>.1;

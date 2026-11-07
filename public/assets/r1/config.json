@@ -367,6 +367,38 @@
       "description": "自主生成的前伸参考，适合比较腕部弹簧扰动。",
       "file": "reach-cc6f9cbb9c9d.json",
       "duration": 10.0
+    },
+    {
+      "id": "wave",
+      "label": "双臂挥动",
+      "description": "周期性抬臂与摆腕，运动中可拖动机器人施力。",
+      "file": "wave-1341bfb3de9f.json",
+      "duration": 10.0,
+      "locomotion": false
+    },
+    {
+      "id": "twist",
+      "label": "转腰摆臂",
+      "description": "双臂配合周期性转腰，同一个冻结策略实时跟踪。",
+      "file": "twist-c07e698b7aa9.json",
+      "duration": 10.0,
+      "locomotion": false
+    },
+    {
+      "id": "squat",
+      "label": "连续浅蹲",
+      "description": "双脚支撑，周期性下蹲与起身，可在运动中推拉机器人。",
+      "file": "squat-b2253364abf9.json",
+      "duration": 10.0,
+      "locomotion": false
+    },
+    {
+      "id": "walk",
+      "label": "向前步行",
+      "description": "自主生成的低速步行参考；真实策略驱动迈步与前进，可在行走中施力。",
+      "file": "walk-5c35e52b2f15.json",
+      "duration": 10.0,
+      "locomotion": true
     }
   ],
   "files": {
@@ -420,7 +452,15 @@
     "raise.json": "147b979d0b9b56a4cdab367c19eb91725d8eb0b05e9bdaa480898dd1b354e560",
     "reach-cc6f9cbb9c9d.json": "cc6f9cbb9c9db07355d1a8cbe91f6d66d53343a0bb5612220a23eb1ee93416a1",
     "reach.json": "cc6f9cbb9c9db07355d1a8cbe91f6d66d53343a0bb5612220a23eb1ee93416a1",
+    "squat-b2253364abf9.json": "b2253364abf90366b1f17dde11e090b42f92463dba08326a7f5234f0ddf32f7a",
+    "squat.json": "b2253364abf90366b1f17dde11e090b42f92463dba08326a7f5234f0ddf32f7a",
     "stand-5805574152ce.json": "5805574152ce03eeabe28829f2bd2dc4e1311fdaff4e757a15456a341c1dc051",
-    "stand.json": "5805574152ce03eeabe28829f2bd2dc4e1311fdaff4e757a15456a341c1dc051"
+    "stand.json": "5805574152ce03eeabe28829f2bd2dc4e1311fdaff4e757a15456a341c1dc051",
+    "twist-c07e698b7aa9.json": "c07e698b7aa94de7af1b245166dd745740260c97b59b9dcbaf26d83be5f3298d",
+    "twist.json": "c07e698b7aa94de7af1b245166dd745740260c97b59b9dcbaf26d83be5f3298d",
+    "walk-5c35e52b2f15.json": "5c35e52b2f15c84bc8c709ba719a77393972d23f15ca26b0bb90672dfc919136",
+    "walk.json": "5c35e52b2f15c84bc8c709ba719a77393972d23f15ca26b0bb90672dfc919136",
+    "wave-1341bfb3de9f.json": "1341bfb3de9fad5fabec91ca63666cedac38ea60490452247308417f4538db90",
+    "wave.json": "1341bfb3de9fad5fabec91ca63666cedac38ea60490452247308417f4538db90"
   }
 }
