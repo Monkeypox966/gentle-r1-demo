@@ -1,0 +1,187 @@
+{
+  "status": "passed",
+  "url": "http://127.0.0.1:4173/gentle-r1-demo/",
+  "layouts": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "dialog": {
+        "x": 0,
+        "y": 0,
+        "right": 1110,
+        "bottom": 900
+      },
+      "items": [
+        {
+          "tag": "H2",
+          "x": 32,
+          "y": 318.046875,
+          "right": 1078,
+          "bottom": 406.75
+        },
+        {
+          "tag": "P",
+          "x": 195,
+          "y": 434.75,
+          "right": 915,
+          "bottom": 473.953125
+        },
+        {
+          "tag": "BUTTON",
+          "x": 508.296875,
+          "y": 509.953125,
+          "right": 601.703125,
+          "bottom": 545.953125
+        },
+        {
+          "tag": "DIV",
+          "x": 20,
+          "y": 842,
+          "right": 1090,
+          "bottom": 858
+        }
+      ],
+      "focus": "interaction-help",
+      "playing": false
+    },
+    {
+      "name": "wide",
+      "width": 1920,
+      "height": 1080,
+      "dialog": {
+        "x": 0,
+        "y": 0,
+        "right": 1590,
+        "bottom": 1080
+      },
+      "items": [
+        {
+          "tag": "H2",
+          "x": 245,
+          "y": 401.359375,
+          "right": 1345,
+          "bottom": 501.390625
+        },
+        {
+          "tag": "P",
+          "x": 435,
+          "y": 529.390625,
+          "right": 1155,
+          "bottom": 570.640625
+        },
+        {
+          "tag": "BUTTON",
+          "x": 748.296875,
+          "y": 606.640625,
+          "right": 841.703125,
+          "bottom": 642.640625
+        },
+        {
+          "tag": "DIV",
+          "x": 20,
+          "y": 1022,
+          "right": 1570,
+          "bottom": 1038
+        }
+      ],
+      "focus": "close-interaction-help",
+      "playing": false
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "dialog": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 523.265625
+      },
+      "items": [
+        {
+          "tag": "H2",
+          "x": 20,
+          "y": 126.765625,
+          "right": 370,
+          "bottom": 226.109375
+        },
+        {
+          "tag": "P",
+          "x": 20,
+          "y": 247.109375,
+          "right": 370,
+          "bottom": 301.484375
+        },
+        {
+          "tag": "BUTTON",
+          "x": 150.34375,
+          "y": 325.484375,
+          "right": 239.65625,
+          "bottom": 360.484375
+        },
+        {
+          "tag": "DIV",
+          "x": 20,
+          "y": 482.265625,
+          "right": 370,
+          "bottom": 497.265625
+        }
+      ],
+      "focus": "close-interaction-help",
+      "playing": false
+    },
+    {
+      "name": "landscape",
+      "width": 667,
+      "height": 375,
+      "dialog": {
+        "x": 0,
+        "y": 0,
+        "right": 667,
+        "bottom": 360
+      },
+      "items": [
+        {
+          "tag": "H2",
+          "x": 20,
+          "y": 19.421875,
+          "right": 647,
+          "bottom": 170.203125
+        },
+        {
+          "tag": "P",
+          "x": 20,
+          "y": 191.203125,
+          "right": 647,
+          "bottom": 245.578125
+        },
+        {
+          "tag": "BUTTON",
+          "x": 288.84375,
+          "y": 269.578125,
+          "right": 378.15625,
+          "bottom": 304.578125
+        },
+        {
+          "tag": "DIV",
+          "x": 20,
+          "y": 319,
+          "right": 647,
+          "bottom": 334
+        }
+      ],
+      "focus": "close-interaction-help",
+      "playing": false
+    }
+  ],
+  "clickAnywhere": true,
+  "escape": true,
+  "button": true,
+  "reducedMotion": true,
+  "focusRestored": true,
+  "playbackAfterDismiss": true,
+  "errors": [],
+  "application_script": "index-CjcwzytU.js",
+  "application_style": "index-CwNQJQH4.css"
+}

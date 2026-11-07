@@ -16,12 +16,13 @@ try {
   assert.ok(loaded.loaded,JSON.stringify(loaded));
   console.log('READY',loaded);
   assert.ok(await page.locator('#interaction-help').isVisible(),'The interaction hint must appear once resources are ready');
-  assert.ok((await page.locator('#interaction-help').innerText()).includes('可以用鼠标拖动机器人来施力，从而展现柔顺性'));
+  assert.ok((await page.locator('#interaction-help').innerText()).includes('感受柔顺。'));
   assert.equal(await page.evaluate(()=>window.__R1_DEBUG__.app.playing),false);
-  await page.screenshot({path:'test-results/interaction-help.png',fullPage:true});
+  await page.waitForTimeout(700);await page.screenshot({path:'test-results/interaction-help.png',fullPage:true});
   await page.setViewportSize({width:390,height:844});
   assert.ok(await page.evaluate(()=>{const r=document.querySelector('#interaction-help').getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight;}));
-  await page.locator('#close-interaction-help').click();assert.equal(await page.locator('#interaction-help').isVisible(),false);
+  await page.screenshot({path:'test-results/interaction-help-mobile.png',fullPage:true});
+  await page.locator('#close-interaction-help').click();await page.locator('#interaction-help').waitFor({state:'hidden'});
   await page.setViewportSize({width:1440,height:1050});
   assert.equal(await page.locator('#motion option').count(),7);
   await page.waitForTimeout(500);
@@ -231,7 +232,7 @@ try {
   faultPage.on('pageerror',error=>faultErrors.push(error.message));
   await faultPage.goto(base,{waitUntil:'networkidle',timeout:120000});
   await faultPage.waitForFunction(()=>window.__R1_DEBUG__?.app.loaded,null,{timeout:120000});
-  assert.ok(await faultPage.locator('#interaction-help').isVisible());await faultPage.click('#close-interaction-help');
+  assert.ok(await faultPage.locator('#interaction-help').isVisible());await faultPage.keyboard.press('Escape');await faultPage.locator('#interaction-help').waitFor({state:'hidden'});
   const raiseFile=await faultPage.evaluate(()=>window.__R1_DEBUG__.app.sim.config.motions.find(m=>m.id==='raise').file);
   const pattern='**/'+raiseFile;
   await faultPage.route(pattern,route=>route.abort('failed'));

@@ -51,7 +51,7 @@ async function main(){
     $('motion').replaceChildren(...app.sim.config.motions.map(entry=>new Option(entry.label,entry.id)));
     motionDescription();
     $('controls').disabled=false;$('loading').classList.add('hidden');status('已就绪');
-    $('interaction-help').showModal();
+    $('interaction-help').showModal();$('interaction-help').focus({preventScroll:true});
     resolveReady(true);pump();setInterval(update,100);
   }catch(error){status('加载失败','error');$('loading-text').textContent=error.message;message('页面加载失败，可刷新重试。'+error.message,true);rejectReady(error);console.error(error);}
 }
@@ -88,7 +88,13 @@ $('fullscreen-button').addEventListener('click',()=>{if(document.fullscreenEleme
 document.querySelectorAll('[data-speed]').forEach(button=>button.addEventListener('click',()=>{app.speed=Number(button.dataset.speed);document.querySelectorAll('[data-speed]').forEach(b=>b.classList.toggle('active',b===button));}));
 $('about-button').addEventListener('click',()=>$('about').showModal());
 $('close-about').addEventListener('click',()=>$('about').close());$('about').addEventListener('click',event=>{if(event.target===$('about')){const r=$('about').getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)$('about').close();}});
-$('close-interaction-help').addEventListener('click',()=>{$('interaction-help').close();$('play').focus();});
+function dismissInteractionHelp(){
+  const hint=$('interaction-help');if(!hint.open||hint.classList.contains('leaving'))return;
+  hint.classList.add('leaving');
+  setTimeout(()=>{hint.close();hint.classList.remove('leaving');$('play').focus();},matchMedia('(prefers-reduced-motion: reduce)').matches?0:240);
+}
+$('interaction-help').addEventListener('click',dismissInteractionHelp);
+$('interaction-help').addEventListener('cancel',event=>{event.preventDefault();dismissInteractionHelp();});
 document.addEventListener('keydown',event=>{if(/INPUT|SELECT|BUTTON|TEXTAREA/.test(document.activeElement.tagName)||document.querySelector('dialog[open]'))return;if(event.code==='Space'){event.preventDefault();app.playing?pause():play();}if(event.code==='KeyR'&&app.loaded)reset();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&app.playing){pause();message('标签页已隐藏，仿真自动暂停。');}});
 window.addEventListener('pagehide',()=>{pause();app.viewer?.dispose();app.sim?.dispose();});
