@@ -36,3 +36,5 @@
 最新公网回归还确认了实际`stand/raise/reach`动作ID、双臂运动和失败回滚，结果见`validation-public.json`的`motionSwitching`。
 
 动态参考扩展见[DYNAMIC_MOTIONS.md](DYNAMIC_MOTIONS.md)。原生CPU额外覆盖5/10/15N条件与10N横向推力，共12组32秒，摘要见`dynamic-native.json`。浏览器记录`dynamic`与`loadingHint`，原三动作与站立漂移验证继续保留。精选合成片段的结果不代表原始数据集的泛化评估。
+
+首次动态扩展CI（[42367451057](https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42367451057)）完成全部动作和行走拖拽测试后，在轻推按钮的瞬时力值等待处超时；失败截图中力曲线已记录该推力，机器人仍运行，无页面异常/HTTP错误。测试原先以渲染帧轮询0.25秒瞬时值，慢速软件渲染或按钮自动等待可错过该窗口。现改查界面保留的真实10N力样本，不改变控制/推力/物理验收阈值。失败run没有部署。

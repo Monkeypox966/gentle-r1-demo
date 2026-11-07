@@ -4,7 +4,7 @@
 
 R1 柔顺运动跟踪策略的纯浏览器闭环演示。MuJoCo 3.12 WASM 推进真实动力学，ONNX Runtime Web 执行已训练的冻结学生策略，Three.js 渲染当前仿真状态。无需 Python 服务、GPU 服务器、SSH 或串流客户端。
 
-![实际浏览器截图](docs/screenshot.png)
+![实际浏览器步行截图](docs/dynamic-walk.png)
 
 ## 使用
 

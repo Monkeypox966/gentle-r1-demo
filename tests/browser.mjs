@@ -185,7 +185,9 @@ try {
   await page.click('#reset');await page.click('#play');await page.waitForFunction(()=>window.__R1_DEBUG__.app.sim.steps>=10);
   await page.click('#play');const paused=await page.evaluate(()=>window.__R1_DEBUG__.app.playing);assert.equal(paused,false);
   await page.click('#reset');await page.click('#push');
-  await page.waitForFunction(()=>window.__R1_DEBUG__.app.sim.lastForce===10);
+  // The push lasts only .25s. A slow software-rendering RAF can miss its
+  // instantaneous value; check the real UI's retained force samples instead.
+  await page.waitForFunction(()=>window.__R1_DEBUG__.app.forceHistory.includes(10),null,{polling:20});
   await page.click('#play');assert.equal(await page.evaluate(()=>window.__R1_DEBUG__.app.playing),false);
   await page.click('#reset');
   // Find a genuine mesh intersection on the torso, then send real mouse events.

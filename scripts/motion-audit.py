@@ -67,9 +67,9 @@ def run(raw,config,student,seconds,force=10,push=False):
         if step%5==0:
             trace.append({'t':(step+1)*.02,'root':data.qpos[:3].tolist(),'feet':data.xpos[feet].tolist(),
                 'q':data.qpos[qids].tolist(),'reference':motion.q[step].tolist(),'tilt':float(tilt)})
-    settled=[f for f in trace if f['t']>=2]
-    positions=np.array([f['root'] for f in settled])
-    foot_z=np.array([f['feet'] for f in settled])[:,:,2]
+    settled=[f for f in trace if f['t']>=2] or trace
+    positions=np.array([f['root'] for f in settled]).reshape(-1,3)
+    foot_z=np.array([f['feet'] for f in settled]).reshape(-1,2,3)[:,:,2]
     return {'id':raw['name'],'force':force,'push':push,'seconds':seconds,'completed':(step+1)*.02,'fault':fault,
         'joint_rmse_rad':float(np.sqrt(np.mean(np.square(errors)))) if errors else None,'final_root':data.qpos[:3].tolist(),
         'root_height_range':np.ptp(positions[:,2]).item() if len(positions) else None,
