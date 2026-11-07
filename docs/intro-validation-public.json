@@ -1,0 +1,189 @@
+{
+  "status": "passed",
+  "url": "https://monkeypox966.github.io/gentle-r1-demo/",
+  "layouts": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "dialog": {
+        "x": 0,
+        "y": 0,
+        "right": 1110,
+        "bottom": 900
+      },
+      "items": [
+        {
+          "tag": "H2",
+          "x": 32,
+          "y": 318.046875,
+          "right": 1078,
+          "bottom": 406.75
+        },
+        {
+          "tag": "P",
+          "x": 195,
+          "y": 434.75,
+          "right": 915,
+          "bottom": 473.953125
+        },
+        {
+          "tag": "BUTTON",
+          "x": 508.296875,
+          "y": 509.953125,
+          "right": 601.703125,
+          "bottom": 545.953125
+        },
+        {
+          "tag": "DIV",
+          "x": 20,
+          "y": 842,
+          "right": 1090,
+          "bottom": 858
+        }
+      ],
+      "focus": "interaction-help",
+      "playing": false
+    },
+    {
+      "name": "wide",
+      "width": 1920,
+      "height": 1080,
+      "dialog": {
+        "x": 0,
+        "y": 0,
+        "right": 1590,
+        "bottom": 1080
+      },
+      "items": [
+        {
+          "tag": "H2",
+          "x": 245,
+          "y": 401.3645324707031,
+          "right": 1345,
+          "bottom": 501.3957824707031
+        },
+        {
+          "tag": "P",
+          "x": 435,
+          "y": 529.395751953125,
+          "right": 1155,
+          "bottom": 570.645751953125
+        },
+        {
+          "tag": "BUTTON",
+          "x": 748.296875,
+          "y": 606.645751953125,
+          "right": 841.703125,
+          "bottom": 642.645751953125
+        },
+        {
+          "tag": "DIV",
+          "x": 20,
+          "y": 1022,
+          "right": 1570,
+          "bottom": 1038
+        }
+      ],
+      "focus": "close-interaction-help",
+      "playing": false
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "dialog": {
+        "x": 0,
+        "y": 0,
+        "right": 390,
+        "bottom": 523.265625
+      },
+      "items": [
+        {
+          "tag": "H2",
+          "x": 20,
+          "y": 126.765625,
+          "right": 370,
+          "bottom": 226.109375
+        },
+        {
+          "tag": "P",
+          "x": 20,
+          "y": 247.109375,
+          "right": 370,
+          "bottom": 301.484375
+        },
+        {
+          "tag": "BUTTON",
+          "x": 150.34375,
+          "y": 325.484375,
+          "right": 239.65625,
+          "bottom": 360.484375
+        },
+        {
+          "tag": "DIV",
+          "x": 20,
+          "y": 482.265625,
+          "right": 370,
+          "bottom": 497.265625
+        }
+      ],
+      "focus": "close-interaction-help",
+      "playing": false
+    },
+    {
+      "name": "landscape",
+      "width": 667,
+      "height": 375,
+      "dialog": {
+        "x": 0,
+        "y": 0,
+        "right": 667,
+        "bottom": 360
+      },
+      "items": [
+        {
+          "tag": "H2",
+          "x": 20,
+          "y": 19.918119430541992,
+          "right": 647,
+          "bottom": 170.699369430542
+        },
+        {
+          "tag": "P",
+          "x": 20,
+          "y": 191.69937133789062,
+          "right": 647,
+          "bottom": 246.07437133789062
+        },
+        {
+          "tag": "BUTTON",
+          "x": 288.84375,
+          "y": 270.0743713378906,
+          "right": 378.15625,
+          "bottom": 305.0743713378906
+        },
+        {
+          "tag": "DIV",
+          "x": 20,
+          "y": 319,
+          "right": 647,
+          "bottom": 334
+        }
+      ],
+      "focus": "close-interaction-help",
+      "playing": false
+    }
+  ],
+  "clickAnywhere": true,
+  "escape": true,
+  "button": true,
+  "reducedMotion": true,
+  "focusRestored": true,
+  "playbackAfterDismiss": true,
+  "errors": [],
+  "source_commit": "9ca35e61b587c6540b650e8dec149bf604829752",
+  "workflow_run": "https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42369615714",
+  "application_script": "index-CjcwzytU.js",
+  "application_style": "index-CwNQJQH4.css"
+}

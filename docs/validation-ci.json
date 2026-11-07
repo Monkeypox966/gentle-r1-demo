@@ -572,20 +572,20 @@
   },
   "interaction": {
     "push10N": true,
-    "dragPeakForce": 12.714051652035936,
+    "dragPeakForce": 12.615685399522349,
     "releaseClearsForce": true,
     "robotDragWithoutModifier": true,
     "blankDragRotatesCamera": true,
     "walkingDrag": {
       "body": 33,
-      "peakForce": 2.98561018364532,
+      "peakForce": 2.985610183645451,
       "recovery": {
         "steps": 200,
         "time": 4,
         "root": [
-          0.6799559919674475,
-          0.07697139931628666,
-          0.7236841820642302
+          0.6799559919674438,
+          0.076971399316289,
+          0.72368418206423
         ],
         "force": 0,
         "peakForce": 0,
@@ -595,6 +595,6 @@
   },
   "consoleErrors": [],
   "failedResponses": [],
-  "workflow_run": "https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42367869502",
-  "source_commit": "685cb133cbf32c61a21863046475ebc90e017715"
+  "source_commit": "9ca35e61b587c6540b650e8dec149bf604829752",
+  "workflow_run": "https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42369615714"
 }

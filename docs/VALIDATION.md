@@ -44,3 +44,7 @@
 同一版本在公开Pages地址完成全套回归，结果为`validation-public.json`；主脚本`index-C4NehLBU.js`，7个真实动作选择、全部14组闭环、运动中鼠标施力与后续跟踪、加载提示和失败回滚均通过，无页面异常/HTTP失败。公网步行无力/10N轻推的22秒前向位移约3.79/3.82m；真实腕部鼠标拖拽峰值约2.99N，释放后继续行走且外力归零。站立60秒位移仍为8.24/1.27mm。本机公网回归耗时5分19秒、峰值1.6GiB，软件渲染FPS不代表访客硬件表现。
 
 加载引导改版：参考用户提供的[SuperMimic演示](https://supermimic.github.io/demo/)，改为仿真场景上的大字、渐淡背景和轻量入口。四种窗口1440×900、1920×1080、390×844、667×375均检查文本边界，支持点击任意处、按钮、Esc关闭、焦点恢复和减少动态效果；不自动播放。摘要见`intro-validation-local.json`，实际截图见`interaction-help.png`、`interaction-help-mobile.png`。此处仅更改引导UI；冻结模型、参考资源及控制算法没有变化。
+
+引导改版来源`9ca35e61b587c6540b650e8dec149bf604829752`，由[42369615714](https://github.com/Monkeypox966/gentle-r1-demo/actions/runs/42369615714)完成全部数值/浏览器回归和Pages发布。新版JS/CSS为`index-CjcwzytU.js`、`index-CwNQJQH4.css`；完整CI证据已更新至`validation-ci.json`。前一段`validation-public.json`保留动态扩展版完整公网物理证据。
+
+新版公开网址的四尺寸引导验收亦通过，见`intro-validation-public.json`：桌面、宽屏、手机横竖屏无文本溢出，任意点击/按钮/Esc关闭、焦点恢复、减少动态效果及关闭后播放均正常，无页面异常。截图已换为公网实际画面；该定向公网回归耗时1分49秒、峰值1.1GiB。本轮定向公网验收聚焦引导UI，完整物理回归由上述CI重新执行。
