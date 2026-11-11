@@ -1,0 +1,8 @@
+{
+  "checkpoint_sha256": "e63de50193964dd0adb4f8009702f77d2bacfc72a9466106efd5a80c4fab1151",
+  "onnx_sha256": "99566d84319ce33af332b41add2cf1bcd8a76122397c55ac0a58c49c21159916",
+  "parity_observations": 41,
+  "max_absolute_action_error": 2.384185791015625e-06,
+  "gentle_onnx_unchanged": true,
+  "checkpoint_unchanged": true
+}

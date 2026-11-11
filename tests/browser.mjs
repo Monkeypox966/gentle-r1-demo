@@ -1,6 +1,7 @@
 import {chromium} from '@playwright/test';
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
+import {verifyPolicySwitching} from './policy-browser.mjs';
 const base=process.env.TEST_URL||'http://127.0.0.1:4173/gentle-r1-demo/';
 fs.mkdirSync('test-results',{recursive:true});
 const errors=[],requests=[];
@@ -251,8 +252,9 @@ try {
   assert.deepEqual(await faultPage.evaluate(()=>({active:window.__R1_DEBUG__.app.sim.motionId,selected:document.querySelector('#motion').value})),{active:'reach',selected:'reach'});
   assert.ok((await faultPage.locator('#motion-description').innerText()).includes('双臂前伸'));
   assert.deepEqual(faultErrors,[]);await faultPage.close();
+  const policySwitching=await verifyPolicySwitching(page,browser,base);
   assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
-  fs.writeFileSync('test-results/browser.json',JSON.stringify({status:'passed',url:base,maxAbsoluteActionError:maxError,cases,standing,dynamic,
+  fs.writeFileSync('test-results/browser.json',JSON.stringify({status:'passed',url:base,maxAbsoluteActionError:maxError,cases,standing,dynamic,policySwitching,
     loadingHint:{afterResourcesReady:true,desktopAndMobileFits:true,dismissible:true,noAutomaticPlayback:true},
     motionSwitching:{identityChecked:true,physicalArmMotionChecked:true,conditionedMotionPoses,resumeWhilePlaying:true,failedLoadRollback:rollback,latestSelectionWins:true},
     interaction:{push10N:true,dragPeakForce:dragResult.peakForce,releaseClearsForce:true,robotDragWithoutModifier:true,blankDragRotatesCamera:true,

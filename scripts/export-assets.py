@@ -23,6 +23,7 @@ def main():
     mf=json.loads((SOURCE/'manifest.json').read_text())
     assert mf['checkpoint_sha256']=='61a5b331557f8e031de4f05fd71b48f58892e8d020578eaaeb1ea45f104af9c5'
     out=ROOT/'public/assets/r1';out.mkdir(parents=True,exist_ok=True)
+    previous=json.loads((out/'config.json').read_text()) if (out/'config.json').exists() else {}
     motion_ids=['stand','raise','reach','wave','twist','squat','walk']
     for pattern in ['config-*.json','mujoco/r1-contact-*.xml',*[f'{name}-*.json' for name in motion_ids]]:
         for old in out.glob(pattern): old.unlink()
@@ -39,6 +40,14 @@ def main():
         'physical_joint_names','observation_joint_names','reference_joint_names','action_joint_names',
         'control_dt','filter_dt','kp','kd','effort','velocity','lower','upper','default','default_root_height','action_scale']}
     config['onnx_sha256']=sha256(out/'policy.onnx')
+    config['default_policy']='gentle'
+    config['policies']=[{'id':'gentle','label':'柔顺 · Gentle','description':'使用柔顺参考训练，允许在外力下让步。',
+        'file':'policy.onnx','onnx_sha256':config['onnx_sha256'],'checkpoint_sha256':config['checkpoint_sha256'],
+        'training_semantics_version':2,'force_conditioned':True}]
+    for entry in previous.get('policies',[]):
+        if entry['id']=='gentle':continue
+        assert sha256(out/entry['file'])==entry['onnx_sha256'],'Previously exported policy changed'
+        config['policies'].append(entry)
     config['physics_dt']=.001
     config['browser_contact_solver']=contact_settings
     config['model_file']=model_file
@@ -118,6 +127,8 @@ def main():
     (ROOT/'ASSET_PROVENANCE.json').write_text(json.dumps({'checkpoint_sha256':config['checkpoint_sha256'],
         'onnx_sha256':config['onnx_sha256'],'mujoco_version':'3.12.0','motion_source':'original synthetic references',
         'source_training_project':'gentle-r1','raw_training_data_included':False,'assets':config['files'],
+        'policies':config['policies'],
+        'comparison_note':'Two independently trained policies; Gentle v2 and Vanilla v3 differ in environment fixes, so this is not a controlled ablation.',
         'browser_model_changes':{'source_model_sha256':source_model_sha,'option':contact_settings,
           'friction_unchanged':1.0,'reason':'Contact-accuracy audit; policy 50Hz and target filter 200Hz unchanged; no foot pinning.'}},indent=2)+'\n')
     print('Exported frozen R1 model and seven original reference motions')

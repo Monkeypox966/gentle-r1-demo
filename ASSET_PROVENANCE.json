@@ -51,6 +51,7 @@
     "mujoco/meshes/waist_yaw_link.STL": "30871f7060d90940f47f28faebf2e16f5c368af1bec90f0a1e3f6ec94355943b",
     "mujoco/r1-contact-63b02c43e430.xml": "63b02c43e430ad5055b523abb19726d5630d3a0c6107beb814d5e5d156540f15",
     "mujoco/r1.xml": "63b02c43e430ad5055b523abb19726d5630d3a0c6107beb814d5e5d156540f15",
+    "policy-vanilla-99566d84319c.onnx": "99566d84319ce33af332b41add2cf1bcd8a76122397c55ac0a58c49c21159916",
     "policy.onnx": "726ca9fd62520498125186e19a5fbc1d9e8d6607245852ca91cb167592d6df21",
     "raise-147b979d0b9b.json": "147b979d0b9b56a4cdab367c19eb91725d8eb0b05e9bdaa480898dd1b354e560",
     "raise.json": "147b979d0b9b56a4cdab367c19eb91725d8eb0b05e9bdaa480898dd1b354e560",
@@ -77,5 +78,28 @@
     },
     "friction_unchanged": 1.0,
     "reason": "Contact-accuracy audit; policy 50Hz and target filter 200Hz unchanged; no foot pinning."
-  }
+  },
+  "policies": [
+    {
+      "id": "gentle",
+      "label": "柔顺 · Gentle",
+      "description": "使用柔顺参考训练，允许在外力下让步。",
+      "file": "policy.onnx",
+      "onnx_sha256": "726ca9fd62520498125186e19a5fbc1d9e8d6607245852ca91cb167592d6df21",
+      "checkpoint_sha256": "61a5b331557f8e031de4f05fd71b48f58892e8d020578eaaeb1ea45f104af9c5",
+      "training_semantics_version": 2,
+      "force_conditioned": true
+    },
+    {
+      "id": "vanilla",
+      "label": "非柔顺 · Vanilla-RL",
+      "description": "跟踪原始参考，不使用柔顺目标训练。",
+      "file": "policy-vanilla-99566d84319c.onnx",
+      "onnx_sha256": "99566d84319ce33af332b41add2cf1bcd8a76122397c55ac0a58c49c21159916",
+      "checkpoint_sha256": "e63de50193964dd0adb4f8009702f77d2bacfc72a9466106efd5a80c4fab1151",
+      "training_semantics_version": 3,
+      "force_conditioned": false
+    }
+  ],
+  "comparison_note": "Two independently trained policies; Gentle v2 and Vanilla v3 differ in environment fixes, so this is not a controlled ablation."
 }

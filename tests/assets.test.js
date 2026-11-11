@@ -16,6 +16,14 @@ test('all frozen policy, model and reference assets match the provenance manifes
   for(const [path,expected] of Object.entries(config.files)){
     assert.equal(createHash('sha256').update(fs.readFileSync(new URL(path,root))).digest('hex'),expected,path);
   }
+  assert.equal(config.default_policy,'gentle');
+  assert.deepEqual(config.policies.map(p=>p.id),['gentle','vanilla']);
+  assert.deepEqual(config.policies,provenance.policies);
+  for(const p of config.policies)assert.equal(config.files[p.file],p.onnx_sha256);
+  assert.notEqual(config.policies[0].onnx_sha256,config.policies[1].onnx_sha256);
+  assert.equal(config.policies[1].checkpoint_sha256,'e63de50193964dd0adb4f8009702f77d2bacfc72a9466106efd5a80c4fab1151');
+  assert.equal(config.policies[0].force_conditioned,true);
+  assert.equal(config.policies[1].force_conditioned,false);
 });
 
 test('all seven references have valid cyclic state and authored dynamic movement',()=>{

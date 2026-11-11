@@ -14,7 +14,8 @@ export class Simulation {
   constructor(onProgress=()=>{}) {
     this.onProgress=onProgress;this.motionId='stand';this.forceLimit=10;this.spring=false;
     this.drag=null;this.pushUntil=0;this.lastForce=0;this.forceVectors=[];this.steps=0;
-    this.policyMs=0;this.motionRequest=0;this.epoch=0;this.fault=null;
+    this.policyMs=0;this.selectionRequest=0;this.epoch=0;this.fault=null;
+    this.policyId='gentle';this.policySessions=new Map();this.policyLoads=new Map();this.disposed=false;
   }
   async init() {
     this.onProgress(.05,'正在载入物理引擎');
@@ -44,13 +45,8 @@ export class Simulation {
     if(this.actToPhysical.some(i=>i<0))throw Error('执行器映射不完整');
     this.wrists=['left_wrist_roll_link','right_wrist_roll_link'].map(n=>this.bodyId(n));this.torso=this.bodyId('waist_yaw_link');this.pelvis=this.bodyId('pelvis_link');
     this.onProgress(.72,'正在载入冻结学生策略');
-    const response=await fetch(BASE+'policy.onnx');if(!response.ok)throw Error('ONNX 下载失败');
-    const bytes=await response.arrayBuffer();
-    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
-    if(hash!==c.onnx_sha256)throw Error('ONNX 完整性检查失败');
-    this.session=await ort.InferenceSession.create(bytes,{executionProviders:['wasm'],graphOptimizationLevel:'all'});
-    if(this.session.inputNames.join()!=='observation' || this.session.outputNames.join()!=='action')throw Error('策略接口不匹配');
-    await this.infer(new Float32Array(392));
+    this.policyId=c.default_policy;
+    this.session=await this.loadPolicy(this.policyId);
     this.motions=new Map();await this.loadMotion('stand');this.reset();this.onProgress(1,'已就绪');
     return this;
   }
@@ -74,12 +70,37 @@ export class Simulation {
     }
     return this.motions.get(id);
   }
-  async selectMotion(id) {
-    const request=++this.motionRequest;this.epoch++;
-    await this.loadMotion(id);
-    if(request!==this.motionRequest)return false;
-    this.motionId=id;this.reset();return true;
+  async loadPolicy(id) {
+    const entry=this.config.policies.find(p=>p.id===id);if(!entry)throw Error('未知策略');
+    if(this.policySessions.has(id))return this.policySessions.get(id);
+    if(this.policyLoads.has(id))return this.policyLoads.get(id);
+    const pending=(async()=>{
+      let session;
+      try{
+        const response=await fetch(BASE+entry.file);if(!response.ok)throw Error('策略下载失败');
+        const bytes=await response.arrayBuffer();
+        const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+        if(hash!==entry.onnx_sha256)throw Error('策略完整性检查失败');
+        session=await ort.InferenceSession.create(bytes,{executionProviders:['wasm'],graphOptimizationLevel:'all'});
+        if(session.inputNames.join()!=='observation'||session.outputNames.join()!=='action')throw Error('策略接口不匹配');
+        await this.runSession(session,new Float32Array(392));
+        if(this.disposed)throw Error('页面已关闭');
+        this.policySessions.set(id,session);return session;
+      }catch(error){await session?.release();throw error;}
+    })();
+    this.policyLoads.set(id,pending);
+    try{return await pending;}finally{this.policyLoads.delete(id);}
   }
+  async select({motionId=this.motionId,policyId=this.policyId}) {
+    const request=++this.selectionRequest;this.epoch++;
+    const [,session]=await Promise.all([this.loadMotion(motionId),this.loadPolicy(policyId)]);
+    if(request!==this.selectionRequest||this.disposed)return false;
+    this.motionId=motionId;this.policyId=policyId;this.session=session;this.reset();return true;
+  }
+  selectMotion(id){return this.select({motionId:id});}
+  selectPolicy(id){return this.select({policyId:id});}
+  get policy(){return this.config.policies.find(p=>p.id===this.policyId);}
+  get effectiveForceLimit(){return this.policy.force_conditioned?this.forceLimit:10;}
   reset() {
     this.epoch++;const c=this.config,m=this.motions.get(this.motionId);if(!m)return;
     this.mj.mj_resetData(this.model,this.data);
@@ -98,7 +119,12 @@ export class Simulation {
   }
   physicalQ(){return Float64Array.from(this.qids,i=>this.data.qpos[i]);}
   physicalV(){return Float64Array.from(this.vids,i=>this.data.qvel[i]);}
-  async infer(observation){const out=await this.session.run({observation:new ort.Tensor('float32',observation,[1,392])});return Float32Array.from(out.action.data,x=>clamp(x,-10,10));}
+  async runSession(session,observation){
+    const out=await session.run({observation:new ort.Tensor('float32',observation,[1,392])});
+    assertFinite(out.action.data,24,'策略输出');
+    return Float32Array.from(out.action.data,x=>clamp(x,-10,10));
+  }
+  infer(observation){return this.runSession(this.session,observation);}
   async step() {
     if(this.fault)throw Error(this.fault);
     const epoch=this.epoch,m=this.motions.get(this.motionId),c=this.config;
@@ -109,7 +135,7 @@ export class Simulation {
       else {
         this.observer.advance(this.lastTwo);this.frame=(this.frame+1)%(m.joint_pos.length-1);
         if(this.frame===0)this.cycles++;
-        this.lastObservation=this.observer.compute(m,this.frame,quat,Array.from(this.data.qvel.slice(3,6)),this.filter.history,this.steps,this.forceLimit);
+        this.lastObservation=this.observer.compute(m,this.frame,quat,Array.from(this.data.qvel.slice(3,6)),this.filter.history,this.steps,this.effectiveForceLimit);
       }
       const started=performance.now(),action=await this.infer(this.lastObservation);
       this.policyMs=performance.now()-started;
@@ -182,5 +208,5 @@ export class Simulation {
     if(enabled)this.springAnchors=this.wrists.map(b=>Array.from(this.data.xpos.slice(b*3,b*3+3),(x,i)=>x+(i===0?.1:0)));
   }
   push(){this.pushUntil=this.time+.25;}
-  dispose(){this.epoch++;this.referenceData?.delete();this.data?.delete();this.model?.delete();this.session?.release();}
+  dispose(){this.disposed=true;this.epoch++;this.selectionRequest++;this.referenceData?.delete();this.data?.delete();this.model?.delete();for(const session of this.policySessions.values())session.release();this.policySessions.clear();}
 }

@@ -3,7 +3,7 @@ import {Simulation} from './simulation.js';
 import {Viewer} from './viewer.js';
 
 const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const app={playing:false,busy:false,speed:1,sim:null,viewer:null,forceHistory:Array(150).fill(0),loaded:false,motionRequest:0,resumeAfterMotion:false};
+const app={playing:false,busy:false,speed:1,sim:null,viewer:null,forceHistory:Array(150).fill(0),loaded:false,selectionRequest:0,resumeAfterSelection:false};
 let resolveReady,rejectReady;
 const ready=new Promise((resolve,reject)=>{resolveReady=resolve;rejectReady=reject;});
 function status(label,kind=''){ $('status-text').textContent=label;$('status-pill').className='status-pill '+kind; }
@@ -49,7 +49,8 @@ async function main(){
     app.sim=new Simulation((value,text)=>{$('loading-progress').style.width=(value*100)+'%';$('loading-text').textContent=text;});
     await app.sim.init();app.viewer=new Viewer($('viewport'),app.sim);app.loaded=true;
     $('motion').replaceChildren(...app.sim.config.motions.map(entry=>new Option(entry.label,entry.id)));
-    motionDescription();
+    $('policy').replaceChildren(...app.sim.config.policies.map(entry=>new Option(entry.label,entry.id)));
+    $('policy').value=app.sim.policyId;motionDescription();policyDescription();
     $('controls').disabled=false;$('loading').classList.add('hidden');status('已就绪');
     $('interaction-help').showModal();$('interaction-help').focus({preventScroll:true});
     resolveReady(true);pump();setInterval(update,100);
@@ -60,25 +61,41 @@ function motionDescription(){
   const entry=app.sim.config.motions.find(m=>m.id===app.sim.motionId);
   $('motion-description').textContent=entry.label+' · '+entry.description;
 }
-$('motion').addEventListener('change',async event=>{
-  const id=event.currentTarget.value,request=++app.motionRequest;
-  app.resumeAfterMotion=app.playing||(app.busy&&app.resumeAfterMotion);
-  pause();app.viewer.releaseDrag();app.busy=true;$('play').disabled=$('reset').disabled=true;status('正在切换');
+function policyDescription(){
+  const entry=app.sim.policy;
+  $('policy-description').textContent=entry.description;
+  $('force-limit').disabled=app.busy||!entry.force_conditioned;
+  $('force-value').innerHTML=entry.force_conditioned?$('force-limit').value+'<span> N</span>':'—';
+  $('force-note').textContent=entry.force_conditioned?'网络条件输入，不是实际接触力上限。':'该策略不使用柔顺力调节，仍可拖动施力。';
+  $('force-control').classList.toggle('inactive',!entry.force_conditioned);
+}
+async function selectReferenceOrPolicy(){
+  const motionId=$('motion').value,policyId=$('policy').value,request=++app.selectionRequest;
+  app.resumeAfterSelection=app.playing||(app.busy&&app.resumeAfterSelection);
+  pause();app.viewer.releaseDrag();app.busy=true;
+  for(const id of ['play','reset','push','spring','force-limit'])$(id).disabled=true;
+  status('正在切换');message('');
   try{
-    const committed=await app.sim.selectMotion(id);
-    if(request!==app.motionRequest||!committed)return;
-    app.forceHistory.fill(0);app.viewer.follow=!!app.sim.config.motions.find(m=>m.id===id).locomotion;
-    app.viewer.home();motionDescription();$('motion').value=app.sim.motionId;
+    const committed=await app.sim.select({motionId,policyId});
+    if(request!==app.selectionRequest||!committed)return;
+    app.forceHistory.fill(0);app.viewer.follow=!!app.sim.config.motions.find(m=>m.id===motionId).locomotion;
+    app.viewer.home();motionDescription();$('motion').value=app.sim.motionId;$('policy').value=app.sim.policyId;
     $('play-label').textContent='运行策略';status('已就绪');message('');
-    app.busy=false;if(app.resumeAfterMotion)play();update();
+    app.busy=false;policyDescription();if(app.resumeAfterSelection)play();update();
   }catch(error){
-    if(request!==app.motionRequest)return;
-    $('motion').value=app.sim.motionId;motionDescription();
-    message('动作切换失败：'+error.message,true);status('切换失败','error');
+    if(request!==app.selectionRequest)return;
+    $('motion').value=app.sim.motionId;$('policy').value=app.sim.policyId;motionDescription();
+    message('切换失败：'+error.message,true);status('切换失败','error');
   }finally{
-    if(request===app.motionRequest){app.busy=false;app.resumeAfterMotion=false;$('play').disabled=$('reset').disabled=false;}
+    if(request===app.selectionRequest){
+      app.busy=false;app.resumeAfterSelection=false;
+      for(const id of ['play','reset','push','spring'])$(id).disabled=false;
+      policyDescription();
+    }
   }
-});
+}
+$('motion').addEventListener('change',selectReferenceOrPolicy);
+$('policy').addEventListener('change',selectReferenceOrPolicy);
 $('force-limit').addEventListener('input',event=>{const value=Number(event.target.value);$('force-value').innerHTML=value+'<span> N</span>';if(app.sim)app.sim.forceLimit=value;});
 $('spring').addEventListener('change',event=>{app.sim.setSpring(event.target.checked);message('');});
 $('push').addEventListener('click',()=>{if(!app.playing)play();app.sim.push();message('向躯干施加 10 N、约 0.25 秒的外力。');});

@@ -21,15 +21,20 @@
       <aside class="panel">
         <div class="panel-title"><h1>R1 策略仿真</h1><button id="about-button" class="text-button" title="模型与方法说明">说明</button></div>
         <fieldset id="controls" disabled>
+          <label class="field-label" for="policy"><span>策略</span></label>
+          <div class="select-wrap"><select id="policy"><option value="gentle">柔顺 · Gentle</option><option value="vanilla">非柔顺 · Vanilla-RL</option></select></div>
+          <p class="field-note" id="policy-description">使用柔顺参考训练，允许在外力下让步。</p>
           <label class="field-label" for="motion"><span>参考动作</span></label>
           <div class="select-wrap"><select id="motion"><option value="stand">自然站立</option><option value="raise">双臂抬起</option><option value="reach">双臂前伸</option></select></div>
           <p class="field-note" id="motion-description">固定站立参考；仿真持续运行。</p>
           <div class="play-row"><button id="play" class="primary-button"><span id="play-icon">▶</span><span id="play-label">运行策略</span></button><button id="reset" class="secondary-button" aria-label="复位仿真" title="复位仿真">↺</button></div>
           <div class="time-row"><span>仿真时间 <output id="time">0.00 s</output></span><span>连续运行</span></div>
           <div class="divider"></div>
+          <div id="force-control">
           <label class="field-label" for="force-limit"><span>柔顺力条件</span><output id="force-value">10<span> N</span></output></label>
           <input id="force-limit" type="range" min="5" max="15" value="10" step="1" /><div class="range-labels"><span>5 N · 较柔</span><span>15 N · 较强</span></div>
-          <p class="field-note">网络条件输入，不是实际接触力上限。</p>
+          <p class="field-note" id="force-note">网络条件输入，不是实际接触力上限。</p>
+          </div>
           <div class="divider"></div>
           <p class="field-label"><span>交互扰动</span></p>
           <label class="toggle-row"><span><b>腕部弹簧</b><small>150 N/m · 平滑加载，关闭时撤力</small></span><input id="spring" type="checkbox" role="switch" /><span class="switch" aria-hidden="true"></span></label>
@@ -50,7 +55,7 @@
     </div>
     <div class="intro-gestures" aria-label="操作提示"><span>松开撤力</span><i aria-hidden="true"></i><span>空白拖动旋转</span><i aria-hidden="true"></i><span>滚轮缩放</span></div>
   </dialog>
-  <dialog id="about"><button id="close-about" class="dialog-close" aria-label="关闭">×</button><h2>模型与方法</h2><p>网页每 20 ms 组装 392 维观测，运行冻结的 R1 学生网络，以 200 Hz 滤波关节目标，并以 1,000 Hz 推进 MuJoCo 动力学。屏幕上的机器人始终来自当前物理状态。</p><dl><dt>学习方法</dt><dd>GentleHumanoid，适配至 R1 26DOF</dd><dt>训练量</dt><dd>Teacher 40 亿 / Adapt 10 亿 / Finetune 20 亿预算</dd><dt>参考动作</dt><dd>本演示自主生成的平滑参考，不发布训练数据集</dd><dt>头部</dt><dd>保持零位，参与物理和观测，不接收策略动作</dd></dl><p>5–15 N 是策略条件，不是对接触力的保证上限。图表显示模拟施加的外力；本演示没有实机或人体接触验收含义。参考叠影仅用于查看目标姿态。</p><p>参考动作循环播放，物理状态、动作滤波与观测历史在循环边界连续。仿真没有时长上限；手动暂停、保护触发或标签页隐藏时停止。复位会重新初始化物理状态。</p><div class="dialog-links"><a href="https://gentle-humanoid.axell.top/" target="_blank" rel="noopener">原始研究 ↗</a><a href="https://github.com/Monkeypox966/gentle-r1-demo" target="_blank" rel="noopener">源码与验证记录 ↗</a><a href="./THIRD_PARTY_NOTICES.md" target="_blank">致谢与许可 ↗</a></div></dialog>
+  <dialog id="about"><button id="close-about" class="dialog-close" aria-label="关闭">×</button><h2>模型与方法</h2><p>网页每 20 ms 组装 392 维观测，运行冻结的 R1 学生网络，以 200 Hz 滤波关节目标，并以 1,000 Hz 推进 MuJoCo 动力学。屏幕上的机器人始终来自当前物理状态。</p><dl><dt>学习方法</dt><dd>GentleHumanoid 柔顺策略 / Vanilla-RL 非柔顺跟踪策略，均适配至 R1 26DOF</dd><dt>训练量</dt><dd>Teacher 40 亿 / Adapt 10 亿 / Finetune 20 亿预算</dd><dt>参考动作</dt><dd>本演示自主生成的平滑参考，不发布训练数据集</dd><dt>头部</dt><dd>保持零位，参与物理和观测，不接收策略动作</dd></dl><p>两种策略均为独立训练的冻结学生网络；切换会复位仿真并保留参考动作。5–15 N 仅调节柔顺策略，非柔顺策略下该滑块不生效，不保证实际接触力上限。图表显示模拟施加的外力；本演示没有实机或人体接触验收含义。参考叠影仅用于查看目标姿态。</p><p>两种策略使用同一网页动力学、参考动作和外力交互。它们的训练代码修订不同，本页面的对比不等于严格的单变量消融。参考动作循环播放，物理状态、动作滤波与观测历史在循环边界连续。仿真没有时长上限；手动暂停、保护触发或标签页隐藏时停止。复位会重新初始化物理状态。</p><div class="dialog-links"><a href="https://gentle-humanoid.axell.top/" target="_blank" rel="noopener">原始研究 ↗</a><a href="https://github.com/Monkeypox966/gentle-r1-demo" target="_blank" rel="noopener">源码与验证记录 ↗</a><a href="./THIRD_PARTY_NOTICES.md" target="_blank">致谢与许可 ↗</a></div></dialog>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
