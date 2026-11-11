@@ -1,0 +1,57 @@
+{
+  "status": "passed",
+  "url": "https://monkeypox966.github.io/gentle-r1-demo/?v=a5e7d87-smoke",
+  "sourceCommit": "a5e7d8744bbfa1717dd52936d04fd831143093d6",
+  "script": "/gentle-r1-demo/assets/index-DjTn_IOt.js",
+  "checkedAt": "2026-11-11T11:54:22.985Z",
+  "parity": {
+    "gentle": 0.0000016689300537109375,
+    "vanilla": 0.0000016689300537109375
+  },
+  "cases": [
+    {
+      "id": "stand",
+      "steps": 300,
+      "time": 6,
+      "root": [
+        -0.009513290055720844,
+        -0.04064248908152089,
+        0.7265769116678398
+      ],
+      "force": 0,
+      "peakForce": 0,
+      "fault": null
+    },
+    {
+      "id": "reach",
+      "steps": 300,
+      "time": 6,
+      "root": [
+        -0.030102625377952805,
+        0.000383969603529661,
+        0.7338809760539279
+      ],
+      "force": 0,
+      "peakForce": 0,
+      "fault": null
+    },
+    {
+      "id": "walk",
+      "steps": 600,
+      "time": 12,
+      "root": [
+        1.878109383650867,
+        0.3962750396007855,
+        0.7218645428037141
+      ],
+      "force": 0,
+      "peakForce": 0,
+      "fault": null
+    }
+  ],
+  "runningSwitchResumes": true,
+  "forceSliderMatchesPolicy": true,
+  "pageErrors": [],
+  "httpFailures": [],
+  "negativeLoadAndRaceTests": "Passed locally and in GitHub Actions; not repeated in this focused public smoke."
+}

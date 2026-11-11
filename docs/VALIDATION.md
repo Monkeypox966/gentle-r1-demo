@@ -2,6 +2,8 @@
 
 2026-11-11双策略版本本地生产构建验收通过：[双策略记录](validation-policies.json)、[来源与切换说明](POLICY_SWITCH.md)。两策略浏览器独立Python对照误差均约1.67e-6；Vanilla与旧Gentle的同输入动作差最大约5.38，确认实际切换了网络。原Gentle十四组闭环全部通过，Vanilla七动作各12秒闭环、步行前进、轻推/真实鼠标施力和撤力后恢复、运行中切换、失败回退、跨策略/动作乱序返回与手机布局均通过；无页面异常/HTTP失败。截图见policy-{gentle,vanilla,mobile}.png。
 
+该版本已通过GitHub工作流`43013761934`并发布：[部署证据](policy-deployment.json)。[公网定向复核](validation-policies-public.json)验证两网络误差约1.67e-6、站立/前伸/步行和实际切换，资源就绪且无页面异常/HTTP错误。更早的第二页面等待networkidle超时另行保留在[首次公网记录](policy-public-first-attempt.json)，不冒充已通过的完整负向加载测试。
+
 2026-11-07：页面精简、连续运行、直接拖拽与接触模型精度修正。物理变化的原因与对照见[接触诊断](CONTACT_AUDIT.md)。
 
 | 环境 | 证据 |

@@ -26,3 +26,9 @@ Vanilla导出仅只读访问训练项目，未生成额外训练数据或改写�
 最终记录在validation-policies.json，截图为policy-gentle.png、policy-vanilla.png及policy-mobile.png；发布前须完成本地与GitHub Actions浏览器验收。
 
 本地生产构建已通过全部验收。两网络浏览器对各自Python oracle的误差约1.67e-6，同输入下Vanilla与Gentle动作最大差约5.38；返回Gentle后的数值对照仍通过。Vanilla步行12秒实际前进约1.88m，七动作均无保护故障；真实10N轻推、鼠标施力/撤力、跨动作与策略的乱序返回验证均通过。默认Gentle的十四组原物理回归也全部通过。
+
+## 发布与公网
+
+源码`a5e7d8744bbfa1717dd52936d04fd831143093d6`已发布至原GitHub Pages地址；工作流`43013761934`的构建、完整浏览器验收及部署均成功，见policy-deployment.json。公开脚本为`index-DjTn_IOt.js`。
+
+公网首次扩展检查中，七个Vanilla动作及正向交互已通过，但额外打开第二个页面等待networkidle时超时，未将其记为整轮通过；详情保留在policy-public-first-attempt.json。随后另开单页面，以资源/仿真实际就绪为条件，完成两网络独立数值对照、站立/前伸/步行、运行中切换与滑块状态验证，均通过且无页面异常或HTTP错误，见validation-policies-public.json及policy-public.png。下载失败及乱序测试已在本地和CI通过，未在该定向公网复核中再次执行。

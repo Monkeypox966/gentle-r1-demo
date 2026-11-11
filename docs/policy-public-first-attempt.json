@@ -1,0 +1,65 @@
+{
+  "status": "partial",
+  "public_vanilla_motion_cases_passed": [
+    {
+      "motion": "stand",
+      "root": [
+        -0.0067335163857962154,
+        -0.04092493755113642,
+        0.7263214792968893
+      ]
+    },
+    {
+      "motion": "raise",
+      "root": [
+        -0.022862461925630614,
+        -0.01766501150013236,
+        0.7291999951728407
+      ]
+    },
+    {
+      "motion": "reach",
+      "root": [
+        -0.0248383127388517,
+        -0.016718310635910297,
+        0.7299992256984477
+      ]
+    },
+    {
+      "motion": "wave",
+      "root": [
+        -0.02101942978569264,
+        0.01506827989337713,
+        0.7327886264183359
+      ]
+    },
+    {
+      "motion": "twist",
+      "root": [
+        -0.02004910580601758,
+        0.01028699315600705,
+        0.7331918253976261
+      ]
+    },
+    {
+      "motion": "squat",
+      "root": [
+        -0.018919969882797774,
+        -0.029890158623964744,
+        0.6652188909524043
+      ]
+    },
+    {
+      "motion": "walk",
+      "root": [
+        1.878109383650867,
+        0.3962750396007855,
+        0.7218645428037141
+      ]
+    }
+  ],
+  "failed_stage": "Fresh second page navigation waiting for networkidle",
+  "timeout_seconds": 120,
+  "local_and_ci_full_browser_suite": "passed",
+  "scope": "Positive policy inference, seven motions and interaction completed before the navigation timeout; no claim that this public negative-load run completed."
+}
